@@ -1,0 +1,399 @@
+package controller
+
+import (
+	"easyacme/internal/common"
+	"easyacme/internal/model"
+	"easyacme/internal/service"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
+	"github.com/goccy/go-json"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+	"net/http"
+	"strconv"
+	"sync"
+)
+
+// AccountController 用户控制器
+type AccountController struct {
+	db             *gorm.DB
+	logger         *zap.Logger
+	accountService service.AccountService
+	initUserMutex  sync.Mutex // 初始化用户的互斥锁
+}
+
+// NewAccountController 创建用户控制器
+func NewAccountController(db *gorm.DB, logger *zap.Logger, accountService service.AccountService) *AccountController {
+	return &AccountController{
+		db:             db,
+		logger:         logger,
+		accountService: accountService,
+	}
+}
+
+// ===== 认证相关接口 =====
+
+// Login 用户登录
+func (s *AccountController) Login(ctx *gin.Context) {
+	var req service.LoginReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := s.accountService.LoginWithSession(ctx.Request.Context(), &req)
+	if err != nil {
+		s.logger.Error("Login err: " + err.Error())
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 设置session
+	session := sessions.Default(ctx)
+	userJson, err := json.Marshal(user)
+	if err != nil {
+		s.logger.Error("Marshal user err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "序列化失败"})
+		return
+	}
+	session.Set(common.SessionUser, userJson)
+	if err := session.Save(); err != nil {
+		s.logger.Error("Save session err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "保存会话失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "登录成功",
+		"user":    user,
+	})
+}
+
+// Logout 用户登出
+func (s *AccountController) Logout(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	session.Clear()
+	if err := session.Save(); err != nil {
+		s.logger.Error("Clear session err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "清除会话失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "登出成功"})
+}
+
+// GetMe 获取当前用户信息
+func (s *AccountController) GetMe(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	userJson := session.Get(common.SessionUser)
+	if userJson == nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未登录"})
+		return
+	}
+	var user *model.User
+	userBytes, ok := userJson.([]byte)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "type error"})
+		return
+	}
+	err := json.Unmarshal(userBytes, &user)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unmarshal error"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, user)
+}
+
+// ===== 用户相关接口 =====
+
+// CreateUserReq 创建用户请求结构体
+type CreateUserReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Language string `json:"language"`
+	RoleIDs  []int  `json:"role_ids"`
+}
+
+// UpdateUserReq 更新用户请求结构体
+type UpdateUserReq struct {
+	Username string `json:"username"`
+	Enabled  *bool  `json:"enabled"`
+	Language string `json:"language"`
+	RoleIDs  []int  `json:"role_ids"`
+}
+
+// CreateUser 创建用户
+func (s *AccountController) CreateUser(ctx *gin.Context) {
+	var req CreateUserReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := s.accountService.CreateUser(ctx.Request.Context(), &service.CreateUserReq{
+		Username: req.Username,
+		Password: req.Password,
+		Language: req.Language,
+		RoleIDs:  req.RoleIDs,
+	})
+	if err != nil {
+		s.logger.Error("CreateUser err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "用户创建成功"})
+}
+
+// GetUsers 获取用户列表
+func (s *AccountController) GetUsers(ctx *gin.Context) {
+	var req service.ListUserReq
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	users, err := s.accountService.GetUsers(ctx.Request.Context(), &req)
+	if err != nil {
+		s.logger.Error("GetUsers err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "查询失败:" + err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, users)
+}
+
+// GetUser 获取用户详情
+func (s *AccountController) GetUser(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	if idStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户ID不能为空"})
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户ID格式错误"})
+		return
+	}
+
+	user, err := s.accountService.GetUser(ctx.Request.Context(), &service.GetUserReq{ID: id})
+	if err != nil {
+		s.logger.Error("GetUser err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "查询失败:" + err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, user)
+}
+
+// UpdateUser 更新用户
+func (s *AccountController) UpdateUser(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	if idStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户ID不能为空"})
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户ID格式错误"})
+		return
+	}
+
+	var req UpdateUserReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = s.accountService.UpdateUser(ctx.Request.Context(), &service.UpdateUserReq{
+		ID:       id,
+		Username: req.Username,
+		Enabled:  req.Enabled,
+		Language: req.Language,
+		RoleIDs:  req.RoleIDs,
+	})
+	if err != nil {
+		s.logger.Error("UpdateUser err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "用户更新成功"})
+}
+
+// DeleteUser 删除用户
+func (s *AccountController) DeleteUser(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	if idStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户ID不能为空"})
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户ID格式错误"})
+		return
+	}
+
+	err = s.accountService.DeleteUser(ctx.Request.Context(), &service.DeleteUserReq{ID: id})
+	if err != nil {
+		s.logger.Error("DeleteUser err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "用户删除成功"})
+}
+
+// ===== 角色相关接口 =====
+
+// CreateRoleReq 创建角色请求结构体
+type CreateRoleReq struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Permissions []string `json:"permissions"`
+}
+
+// UpdateRoleReq 更新角色请求结构体
+type UpdateRoleReq struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Permissions []string `json:"permissions"`
+}
+
+// CreateRole 创建角色
+func (s *AccountController) CreateRole(ctx *gin.Context) {
+	var req CreateRoleReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := s.accountService.CreateRole(ctx.Request.Context(), &service.CreateRoleReq{
+		Name:        req.Name,
+		Description: req.Description,
+		Permissions: req.Permissions,
+	})
+	if err != nil {
+		s.logger.Error("CreateRole err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "角色创建成功"})
+}
+
+// GetRoles 获取角色列表
+func (s *AccountController) GetRoles(ctx *gin.Context) {
+	var req service.ListRoleReq
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	roles, err := s.accountService.GetRoles(ctx.Request.Context(), &req)
+	if err != nil {
+		s.logger.Error("GetRoles err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "查询失败:" + err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, roles)
+}
+
+// GetRole 获取角色详情
+func (s *AccountController) GetRole(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	if idStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "角色ID不能为空"})
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "角色ID格式错误"})
+		return
+	}
+
+	role, err := s.accountService.GetRole(ctx.Request.Context(), &service.GetRoleReq{ID: id})
+	if err != nil {
+		s.logger.Error("GetRole err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "查询失败:" + err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, role)
+}
+
+// UpdateRole 更新角色
+func (s *AccountController) UpdateRole(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	if idStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "角色ID不能为空"})
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "角色ID格式错误"})
+		return
+	}
+
+	var req UpdateRoleReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = s.accountService.UpdateRole(ctx.Request.Context(), &service.UpdateRoleReq{
+		ID:          id,
+		Name:        req.Name,
+		Description: req.Description,
+		Permissions: req.Permissions,
+	})
+	if err != nil {
+		s.logger.Error("UpdateRole err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "角色更新成功"})
+}
+
+// DeleteRole 删除角色
+func (s *AccountController) DeleteRole(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	if idStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "角色ID不能为空"})
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "角色ID格式错误"})
+		return
+	}
+
+	err = s.accountService.DeleteRole(ctx.Request.Context(), &service.DeleteRoleReq{ID: id})
+	if err != nil {
+		s.logger.Error("DeleteRole err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "角色删除成功"})
+}
+
+// ===== 初始化用户接口 =====
+
+// InitUser 初始化用户（只能执行一次）
+func (s *AccountController) InitUser(ctx *gin.Context) {
+	s.initUserMutex.Lock()
+	defer s.initUserMutex.Unlock()
+
+	var req service.InitUserReq
+
+	resp, err := s.accountService.InitUser(ctx.Request.Context(), &req)
+	if err != nil {
+		s.logger.Error("InitUser err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"username": resp.Username,
+		"password": resp.Password,
+	})
+}
