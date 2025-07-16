@@ -96,6 +96,8 @@ export const DNSShow = () => {
         const typeMap: { [key: string]: { name: string; color: string } } = {
             'tencentcloud': { name: '腾讯云', color: 'blue' },
             'aliyun': { name: '阿里云', color: 'orange' },
+            'huaweicloud': { name: '华为云', color: 'red' },
+            'baiducloud': { name: '百度云', color: 'purple' },
             'cloudflare': { name: 'Cloudflare', color: 'geekblue' },
             'godaddy': { name: 'GoDaddy', color: 'green' },
         };
@@ -107,6 +109,8 @@ export const DNSShow = () => {
         const keyMap: { [key: string]: { idKey: string; keyKey: string } } = {
             'tencentcloud': { idKey: 'TENCENT_SECRET_ID', keyKey: 'TENCENT_SECRET_KEY' },
             'aliyun': { idKey: 'ALIYUN_ACCESS_KEY_ID', keyKey: 'ALIYUN_ACCESS_KEY_SECRET' },
+            'huaweicloud': { idKey: 'HUAWEICLOUD_ACCESS_KEY_ID', keyKey: 'HUAWEICLOUD_SECRET_ACCESS_KEY' },
+            'baiducloud': { idKey: 'BAIDUCLOUD_ACCESS_KEY_ID', keyKey: 'BAIDUCLOUD_SECRET_ACCESS_KEY' },
             'cloudflare': { idKey: 'CLOUDFLARE_API_TOKEN', keyKey: 'CLOUDFLARE_ZONE_ID' },
             'godaddy': { idKey: 'GODADDY_API_KEY', keyKey: 'GODADDY_API_SECRET' },
         };

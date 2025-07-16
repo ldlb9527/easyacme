@@ -7,6 +7,8 @@ type DNSType string
 const (
 	DNSTypeTencentCloud DNSType = "tencentcloud"
 	DNSTypeAliyun       DNSType = "aliyun"
+	DNSTypeHuaweiCloud  DNSType = "huaweicloud"
+	DNSTypeBaiduCloud   DNSType = "baiducloud"
 	DNSTypeCloudflare   DNSType = "cloudflare"
 	DNSTypeGoDaddy      DNSType = "godaddy"
 )
@@ -14,7 +16,7 @@ const (
 // IsValid 验证DNS类型是否有效
 func (d DNSType) IsValid() bool {
 	switch d {
-	case DNSTypeTencentCloud, DNSTypeAliyun, DNSTypeCloudflare, DNSTypeGoDaddy:
+	case DNSTypeTencentCloud, DNSTypeAliyun, DNSTypeHuaweiCloud, DNSTypeBaiduCloud, DNSTypeCloudflare, DNSTypeGoDaddy:
 		return true
 	default:
 		return false
@@ -33,6 +35,10 @@ func (d DNSType) GetDisplayName() string {
 		return "腾讯云"
 	case DNSTypeAliyun:
 		return "阿里云"
+	case DNSTypeHuaweiCloud:
+		return "华为云"
+	case DNSTypeBaiduCloud:
+		return "百度云"
 	case DNSTypeCloudflare:
 		return "Cloudflare"
 	case DNSTypeGoDaddy:

@@ -29,8 +29,10 @@ import (
 	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/providers/dns/alidns"
+	"github.com/go-acme/lego/v4/providers/dns/baiducloud"
 	"github.com/go-acme/lego/v4/providers/dns/cloudflare"
 	"github.com/go-acme/lego/v4/providers/dns/godaddy"
+	"github.com/go-acme/lego/v4/providers/dns/huaweicloud"
 	"github.com/go-acme/lego/v4/providers/dns/tencentcloud"
 	"github.com/go-acme/lego/v4/registration"
 	"github.com/google/uuid"
@@ -957,6 +959,16 @@ func (s *AcmeCertController) CreateLegoDNSProvider(provider *model.DNSProvider) 
 		cf.APIKey = provider.SecretId
 		cf.APISecret = provider.SecretKey
 		return godaddy.NewDNSProviderConfig(cf)
+	case model.DNSTypeBaiduCloud:
+		cf := baiducloud.NewDefaultConfig()
+		cf.AccessKeyID = provider.SecretId
+		cf.SecretAccessKey = provider.SecretKey
+		return baiducloud.NewDNSProviderConfig(cf)
+	case model.DNSTypeHuaweiCloud:
+		cf := huaweicloud.NewDefaultConfig()
+		cf.AccessKeyID = provider.SecretId
+		cf.SecretAccessKey = provider.SecretKey
+		return huaweicloud.NewDNSProviderConfig(cf)
 	default:
 		return nil, fmt.Errorf("unsupported DNS provider type: %s", provider.Type)
 	}

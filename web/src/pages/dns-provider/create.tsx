@@ -9,6 +9,8 @@ export const DNSCreate = () => {
     const providerOptions = [
         { label: '腾讯云', value: 'tencentcloud' },
         { label: '阿里云', value: 'aliyun' },
+        { label: '华为云', value: 'huaweicloud' },
+        { label: '百度云', value: 'baiducloud' },
         { label: 'Cloudflare', value: 'cloudflare' },
         { label: 'GoDaddy', value: 'godaddy' },
     ];
@@ -27,6 +29,18 @@ export const DNSCreate = () => {
                 keyKey: 'ALIYUN_ACCESS_KEY_SECRET',
                 idPlaceholder: '请输入阿里云AccessKeyId',
                 keyPlaceholder: '请输入阿里云AccessKeySecret'
+            },
+            'huaweicloud': { 
+                idKey: 'HUAWEICLOUD_ACCESS_KEY_ID', 
+                keyKey: 'HUAWEICLOUD_SECRET_ACCESS_KEY',
+                idPlaceholder: '请输入华为云Access Key ID',
+                keyPlaceholder: '请输入华为云Secret Access Key'
+            },
+            'baiducloud': { 
+                idKey: 'BAIDUCLOUD_ACCESS_KEY_ID', 
+                keyKey: 'BAIDUCLOUD_SECRET_ACCESS_KEY',
+                idPlaceholder: '请输入百度云Access Key',
+                keyPlaceholder: '请输入百度云Secret Access Key'
             },
             'cloudflare': { 
                 idKey: 'CLOUDFLARE_API_TOKEN', 
