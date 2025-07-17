@@ -6,6 +6,7 @@ import (
 	"easyacme/internal/config"
 	"easyacme/internal/controller"
 	"easyacme/internal/middleware"
+	"easyacme/internal/migration"
 	"easyacme/internal/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -31,9 +32,15 @@ func main() {
 		fx.Provide(controller.NewDNSController),
 		fx.Provide(controller.NewAccountController),
 		fx.Provide(controller.NewStatisticsController),
+		fx.Provide(common.NewMigrationManager),
 		fx.Provide(NewGinEngine),
 		fx.Provide(NewHttpServer),
 
+		fx.Invoke(func(migrationManager *common.MigrationManager, logger *zap.Logger) {
+			if err := runMigrations(migrationManager, logger); err != nil {
+				logger.Fatal("Failed to run migrations", zap.Error(err))
+			}
+		}),
 		fx.Invoke(func(server *http.Server) {}),
 	)
 	app.Run()
@@ -159,4 +166,24 @@ func NewHttpServer(
 	})
 
 	return server
+}
+
+// runMigrations 执行数据库迁移
+func runMigrations(migrationManager *common.MigrationManager, logger *zap.Logger) error {
+	logger.Info("Starting migration")
+
+	for _, mig := range migration.AllMigration {
+		if err := migrationManager.AddMigration(mig); err != nil {
+			logger.Error("Failed to add migration", zap.String("migration_id", mig.ID), zap.Error(err))
+			return err
+		}
+	}
+
+	if err := migrationManager.Migrate(); err != nil {
+		logger.Error("Failed to execute Migrate", zap.Error(err))
+		return err
+	}
+
+	logger.Info("migration successfully")
+	return nil
 }
