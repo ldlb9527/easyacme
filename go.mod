@@ -2,8 +2,6 @@ module easyacme
 
 go 1.23.0
 
-toolchain go1.23.4
-
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gin-contrib/cors v1.7.5
