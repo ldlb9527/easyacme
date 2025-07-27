@@ -8,6 +8,10 @@ import "@refinedev/antd/dist/reset.css";
 
 import { useList } from "@refinedev/core";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+
+// 导入i18n配置
+import './i18n';
 
  import { API_BASE_URL } from './config';
 import {
@@ -205,6 +209,8 @@ function App() {
         document.title = "Easy ACME";
     }, []);
 
+    const { t } = useTranslation();
+
     return (
         <BrowserRouter>
             {/* 精确隐藏logout菜单项，不影响二级菜单 */}
@@ -264,7 +270,7 @@ function App() {
                                     name: "dashboard",
                                     list: "/",
                                     meta: {
-                                        label: "仪表盘",
+                                        label: t("menu.dashboard"),
                                         icon: <LineChartOutlined />,
                                     },
                                 },
@@ -276,7 +282,7 @@ function App() {
                                     show: "dns/provider/show/:id",
                                     meta: {
                                         canDelete: true,
-                                        label: "DNS授权",
+                                        label: t("menu.dnsProvider"),
                                         icon: <CloudOutlined />,
                                     },
 
@@ -289,7 +295,7 @@ function App() {
                                     show: "/acme/accounts/show/:id",
                                     meta: {
                                         canDelete: true,
-                                        label: "ACME账户",
+                                        label: t("menu.acmeAccounts"),
                                         icon: <ContactsOutlined />,
                                     },
 
@@ -301,13 +307,13 @@ function App() {
                                     show: "/acme/certificates/show/:id",
                                     meta: {
                                         canDelete: true,
-                                        label: "证书列表",
+                                        label: t("menu.certificates"),
                                     },
                                 },
                                 {
                                     name: "system",
                                     meta: {
-                                        label: "系统管理",
+                                        label: t("menu.system"),
                                         icon: <SettingOutlined />,
                                     },
                                 },
@@ -318,7 +324,7 @@ function App() {
                                     edit: "account/users/edit/:id",
                                     show: "account/users/show/:id",
                                     meta: {
-                                        label: "用户管理",
+                                        label: t("menu.users"),
                                         icon: <UserOutlined />,
                                         parent: "system",
                                     },
@@ -330,7 +336,7 @@ function App() {
                                     edit: "account/roles/edit/:id",
                                     show: "account/roles/show/:id",
                                     meta: {
-                                        label: "角色管理",
+                                        label: t("menu.roles"),
                                         icon: <TeamOutlined />,
                                         parent: "system",
                                     },

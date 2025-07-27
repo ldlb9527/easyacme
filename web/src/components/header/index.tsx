@@ -10,10 +10,12 @@ import {
   Badge,
   Dropdown,
   Menu,
+  Button,
 } from "antd";
 import React, { useContext } from "react";
-import { LogoutOutlined, UserOutlined, SettingOutlined } from "@ant-design/icons";
+import { LogoutOutlined, UserOutlined, SettingOutlined, GlobalOutlined } from "@ant-design/icons";
 import { ColorModeContext } from "../../contexts/color-mode";
+import { useTranslation } from "react-i18next";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -30,6 +32,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   const { token } = useToken();
   const { data: user } = useGetIdentity<IUser>();
   const { mode, setMode } = useContext(ColorModeContext);
+  const { t, i18n } = useTranslation();
   const { mutate: logout } = useLogout();
 
   const headerStyles: React.CSSProperties = {
@@ -48,6 +51,13 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
     headerStyles.top = 0;
     headerStyles.zIndex = 1;
   }
+
+  // 切换语言
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "zh" ? "en" : "zh";
+    i18n.changeLanguage(newLang);
+    localStorage.setItem("language", newLang);
+  };
 
   return (
     <AntdLayout.Header style={headerStyles}>
@@ -75,6 +85,21 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
 
       {/* 右侧用户区域 */}
       <Space size={16}>
+        {/* 语言切换按钮 */}
+        <Button
+          icon={<GlobalOutlined />}
+          type="text"
+          onClick={toggleLanguage}
+          style={{
+            color: token.colorTextSecondary,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          {i18n.language === "zh" ? "EN" : "中"}
+        </Button>
+
+        {/* 主题切换按钮 */}
         <Switch
           checkedChildren="🌙"
           unCheckedChildren="☀️"
@@ -84,6 +109,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             backgroundColor: mode === 'dark' ? '#6366f1' : '#f1f5f9',
           }}
         />
+        
         <Dropdown 
           overlay={
             <Menu 
@@ -91,12 +117,12 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
                 {
                   key: 'profile',
                   icon: <UserOutlined />,
-                  label: '个人信息',
+                  label: t("user.profile"),
                 },
                 {
                   key: 'settings',
                   icon: <SettingOutlined />,
-                  label: '设置',
+                  label: t("user.settings"),
                 },
                 {
                   type: 'divider',
@@ -104,7 +130,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
                 {
                   key: 'logout',
                   icon: <LogoutOutlined />,
-                  label: '退出登录',
+                  label: t("user.logout"),
                   onClick: () => logout(),
                   danger: true,
                 },

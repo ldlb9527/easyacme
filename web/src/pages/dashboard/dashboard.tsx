@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useGetIdentity } from "@refinedev/core";
+import { useTranslation } from "react-i18next";
 import { 
   Row, 
   Col, 
@@ -93,6 +94,8 @@ export const DashboardPage: React.FC = () => {
     name: string;
     avatar: string;
   }>();
+  
+  const { t } = useTranslation();
 
   const [statsData, setStatsData] = useState<{ data: AcmeStats } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -181,8 +184,8 @@ export const DashboardPage: React.FC = () => {
     return (
       <div style={{ padding: '16px' }}>
         <Alert
-          message="数据加载失败"
-          description="无法从服务器获取统计数据，请稍后重试或联系管理员。"
+          message={t("dashboard.error")}
+          description={t("dashboard.errorDesc")}
           type="error"
           showIcon
         />
@@ -245,7 +248,7 @@ export const DashboardPage: React.FC = () => {
     tooltip: {
       showMarkers: false,
       formatter: (datum: any) => {
-        return { name: '签发数量', value: `${datum.count} 个` };
+        return { name: t("dashboard.issueTrend"), value: `${datum.count} ${t("dashboard.totalCerts")}` };
       },
     },
   };
@@ -253,9 +256,9 @@ export const DashboardPage: React.FC = () => {
   // 状态柱状图配置
   const columnConfig = {
     data: [
-      { status: '有效', count: dashboardData.certificates.valid, color: '#10b981' },
-      { status: '过期', count: dashboardData.certificates.expired, color: '#f59e0b' },
-      { status: '吊销', count: dashboardData.certificates.revoked, color: '#ef4444' },
+      { status: t("dashboard.valid"), count: dashboardData.certificates.valid, color: '#10b981' },
+      { status: t("dashboard.expired"), count: dashboardData.certificates.expired, color: '#f59e0b' },
+      { status: t("dashboard.revoked"), count: dashboardData.certificates.revoked, color: '#ef4444' },
     ],
     xField: 'status',
     yField: 'count',
@@ -301,14 +304,14 @@ export const DashboardPage: React.FC = () => {
     interactions: [{ type: 'element-active' }],
     tooltip: {
       formatter: (datum: any) => {
-        return { name: datum.name, value: `${datum.count} 个域名` };
+        return { name: datum.name, value: `${datum.count} ${t("dashboard.domains")}` };
       },
     },
   };
 
   const dnsProviderColumns = [
     {
-      title: "服务商",
+      title: t("dashboard.provider"),
       dataIndex: "name",
       key: "name",
       render: (text: string) => (
@@ -332,7 +335,7 @@ export const DashboardPage: React.FC = () => {
       ),
     },
     {
-      title: "数量",
+      title: t("dashboard.count"),
       dataIndex: "count",
       key: "count",
       render: (count: number) => (
@@ -340,7 +343,7 @@ export const DashboardPage: React.FC = () => {
       ),
     },
     {
-      title: "占比",
+      title: t("dashboard.percentage"),
       key: "percentage",
       render: (_: any, record: any) => {
         const total = dashboardData.dnsProviders.reduce((sum, item) => sum + item.count, 0);
@@ -366,7 +369,7 @@ export const DashboardPage: React.FC = () => {
             title={
               <Space>
                 <UserOutlined style={{ color: '#6366f1' }} />
-                <span>账户统计</span>
+                <span>{t("dashboard.accountStats")}</span>
               </Space>
             }
             bordered={false}
@@ -379,7 +382,7 @@ export const DashboardPage: React.FC = () => {
             <Row>
               <Col span={8}>
                 <MiniStat
-                  title="总数"
+                  title={t("dashboard.total")}
                   value={animatedStats.totalAccounts}
                   icon={<UserOutlined />}
                   color="#6366f1"
@@ -388,7 +391,7 @@ export const DashboardPage: React.FC = () => {
               </Col>
               <Col span={8}>
                 <MiniStat
-                  title="有效"
+                  title={t("dashboard.valid")}
                   value={animatedStats.validAccounts}
                   icon={<CheckCircleOutlined />}
                   color="#10b981"
@@ -397,7 +400,7 @@ export const DashboardPage: React.FC = () => {
               </Col>
               <Col span={8}>
                 <MiniStat
-                  title="停用"
+                  title={t("dashboard.deactivated")}
                   value={animatedStats.deactivatedAccounts}
                   icon={<CloseCircleOutlined />}
                   color="#f59e0b"
@@ -414,9 +417,9 @@ export const DashboardPage: React.FC = () => {
             title={
               <Space>
                 <SafetyCertificateOutlined style={{ color: '#8b5cf6' }} />
-                <span>证书管理</span>
+                <span>{t("dashboard.certManagement")}</span>
                 <Tag color="blue" style={{ fontSize: '10px' }}>
-                  总计 {animatedStats.totalCerts} 个
+                  {t("dashboard.totalCerts")} {animatedStats.totalCerts} {t("dashboard.domains")}
                 </Tag>
               </Space>
             }
@@ -430,7 +433,7 @@ export const DashboardPage: React.FC = () => {
             <Row gutter={16}>
               <Col xs={24} lg={16}>
                 <div style={{ marginBottom: '12px' }}>
-                  <Text strong style={{ fontSize: '13px' }}>签发趋势</Text>
+                  <Text strong style={{ fontSize: '13px' }}>{t("dashboard.issueTrend")}</Text>
                 </div>
                 <div style={{ height: 160 }}>
                   <Line {...lineConfig} />
@@ -438,7 +441,7 @@ export const DashboardPage: React.FC = () => {
               </Col>
               <Col xs={24} lg={8}>
                 <div style={{ marginBottom: '12px' }}>
-                  <Text strong style={{ fontSize: '13px' }}>状态分布</Text>
+                  <Text strong style={{ fontSize: '13px' }}>{t("dashboard.statusDistribution")}</Text>
                 </div>
                 <div style={{ height: 160 }}>
                   <Column {...columnConfig} />
@@ -454,9 +457,9 @@ export const DashboardPage: React.FC = () => {
             title={
               <Space>
                 <CloudOutlined style={{ color: '#06b6d4' }} />
-                <span>DNS服务商管理</span>
+                <span>{t("dashboard.dnsProviderManagement")}</span>
                 <Tag color="green" style={{ fontSize: '10px' }}>
-                  {dashboardData.dnsProviders.reduce((sum, item) => sum + item.count, 0)} 个域名
+                  {dashboardData.dnsProviders.reduce((sum, item) => sum + item.count, 0)} {t("dashboard.domains")}
                 </Tag>
               </Space>
             }
@@ -470,7 +473,7 @@ export const DashboardPage: React.FC = () => {
             <Row gutter={16}>
               <Col xs={24} md={10}>
                 <div style={{ marginBottom: '12px' }}>
-                  <Text strong style={{ fontSize: '13px' }}>服务商分布</Text>
+                  <Text strong style={{ fontSize: '13px' }}>{t("dashboard.providerDistribution")}</Text>
                 </div>
                 <div style={{ height: 200 }}>
                   <Pie {...pieConfig} />
@@ -478,7 +481,7 @@ export const DashboardPage: React.FC = () => {
               </Col>
               <Col xs={24} md={14}>
                 <div style={{ marginBottom: '12px' }}>
-                  <Text strong style={{ fontSize: '13px' }}>详细信息</Text>
+                  <Text strong style={{ fontSize: '13px' }}>{t("dashboard.details")}</Text>
                 </div>
                 <Table
                   dataSource={dashboardData.dnsProviders}
