@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
+import { useTranslation } from 'react-i18next';
 
 export const DNSCreate = () => {
     const { formProps, saveButtonProps, query } = useForm();
     const [selectedType, setSelectedType] = useState('tencentcloud'); // 默认选择腾讯云
+    const { t } = useTranslation();
 
     const providerOptions = [
-        { label: '腾讯云', value: 'tencentcloud' },
-        { label: '阿里云', value: 'aliyun' },
-        { label: '华为云', value: 'huaweicloud' },
-        { label: '百度云', value: 'baiducloud' },
+        { label: t('dnsProviderPage.tencentcloud'), value: 'tencentcloud' },
+        { label: t('dnsProviderPage.aliyun'), value: 'aliyun' },
+        { label: t('dnsProviderPage.huaweicloud'), value: 'huaweicloud' },
+        { label: t('dnsProviderPage.baiducloud'), value: 'baiducloud' },
         { label: 'Cloudflare', value: 'cloudflare' },
         { label: 'GoDaddy', value: 'godaddy' },
     ];
@@ -82,29 +84,29 @@ export const DNSCreate = () => {
         <Create saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical" initialValues={{ type: 'tencentcloud' }}>
                 <Form.Item
-                    label="名称"
+                    label={t('dnsProviderPage.name')}
                     name={["name"]}
                     rules={[
                         {
                             required: true,
-                            message: '请输入DNS提供商名称',
+                            message: t('dnsProviderPage.enterName'),
                         },
                     ]}
                 >
-                    <Input placeholder="请输入DNS提供商名称" />
+                    <Input placeholder={t('dnsProviderPage.enterName')} />
                 </Form.Item>
                 <Form.Item
-                    label="厂商类型"
+                    label={t('dnsProviderPage.type')}
                     name={["type"]}
                     rules={[
                         {
                             required: true,
-                            message: '请选择厂商类型',
+                            message: t('dnsProviderPage.selectType'),
                         },
                     ]}
                 >
                     <Select 
-                        placeholder="请选择厂商类型"
+                        placeholder={t('dnsProviderPage.selectType')}
                         options={providerOptions}
                         onChange={handleTypeChange}
                         defaultValue="tencentcloud"
@@ -116,7 +118,7 @@ export const DNSCreate = () => {
                     rules={[
                         {
                             required: true,
-                            message: `请输入${currentKeys.idKey}`,
+                            message: t('dnsProviderPage.enterSecretId', { key: currentKeys.idKey }),
                         },
                     ]}
                 >
@@ -128,14 +130,14 @@ export const DNSCreate = () => {
                     rules={[
                         {
                             required: true,
-                            message: `请输入${currentKeys.keyKey}`,
+                            message: t('dnsProviderPage.enterSecretKey', { key: currentKeys.keyKey }),
                         },
                     ]}
                 >
                     <Input.Password placeholder={currentKeys.keyPlaceholder} />
                 </Form.Item>
                 <Form.Item
-                    label="备注"
+                    label={t('dnsProviderPage.notes')}
                     name={["notes"]}
                     rules={[
                         {
@@ -144,7 +146,7 @@ export const DNSCreate = () => {
                     ]}
                 >
                     <Input.TextArea 
-                        placeholder="请输入备注信息（可选）" 
+                        placeholder={t('dnsProviderPage.enterNotes')} 
                         rows={3}
                         maxLength={200}
                         showCount

@@ -16,6 +16,7 @@ import {
 import dayjs from "dayjs";
 import { CopyOutlined } from "@ant-design/icons";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
@@ -69,6 +70,7 @@ export const DNSShow = () => {
 
     const [secretKey, setSecretKey] = useState<string | null>(null);
     const [isFetchingSecret, setIsFetchingSecret] = useState(false);
+    const { t } = useTranslation();
 
     const handleViewSecretKey = async () => {
         if (!record?.id) return;
@@ -94,14 +96,14 @@ export const DNSShow = () => {
     // 获取厂商类型显示名称
     const getProviderTypeName = (type: string) => {
         const typeMap: { [key: string]: { name: string; color: string } } = {
-            'tencentcloud': { name: '腾讯云', color: 'blue' },
-            'aliyun': { name: '阿里云', color: 'orange' },
-            'huaweicloud': { name: '华为云', color: 'red' },
-            'baiducloud': { name: '百度云', color: 'purple' },
+            'tencentcloud': { name: t('dnsProviderPage.tencentcloud'), color: 'blue' },
+            'aliyun': { name: t('dnsProviderPage.aliyun'), color: 'orange' },
+            'huaweicloud': { name: t('dnsProviderPage.huaweicloud'), color: 'red' },
+            'baiducloud': { name: t('dnsProviderPage.baiducloud'), color: 'purple' },
             'cloudflare': { name: 'Cloudflare', color: 'geekblue' },
             'godaddy': { name: 'GoDaddy', color: 'green' },
         };
-        return typeMap[type] || { name: type || '未知', color: 'default' };
+        return typeMap[type] || { name: type || t('dnsProviderPage.unknown'), color: 'default' };
     };
 
     // 获取授权字段的键名
@@ -120,17 +122,19 @@ export const DNSShow = () => {
     const typeInfo = getProviderTypeName(record?.type);
     const credentialKeys = getCredentialKeys(record?.type);
 
+
+
     return (
         <Show isLoading={isLoading}>
             <Card bordered={false}>
-                <Descriptions bordered column={2} title="DNS 提供商详情">
+                <Descriptions bordered column={2} title={t('dnsProviderPage.details')}>
                     <Descriptions.Item label="ID">{record?.id}</Descriptions.Item>
-                    <Descriptions.Item label="名称">{record?.name}</Descriptions.Item>
+                    <Descriptions.Item label={t('dnsProviderPage.name')}>{record?.name}</Descriptions.Item>
 
-                    <Descriptions.Item label="厂商类型">
+                    <Descriptions.Item label={t('dnsProviderPage.type')}>
                         <Tag color={typeInfo.color}>{typeInfo.name}</Tag>
                     </Descriptions.Item>
-                     <Descriptions.Item label="备注">{record?.notes || '-'}</Descriptions.Item>
+                     <Descriptions.Item label={t('dnsProviderPage.notes')}>{record?.notes || '-'}</Descriptions.Item>
 
                     <Descriptions.Item label={credentialKeys.idKey} span={2}>
                         <Text copyable>{record?.secret_id || '-'}</Text>
@@ -144,15 +148,15 @@ export const DNSShow = () => {
                                 onClick={handleViewSecretKey}
                                 loading={isFetchingSecret}
                             >
-                                查看密钥
+                                {t('dnsProviderPage.viewSecretKey')}
                             </Button>
                         )}
                     </Descriptions.Item>
 
-                    <Descriptions.Item label="创建时间">
+                    <Descriptions.Item label={t('dnsProviderPage.createdAt')}>
                         {record?.created_at ? dayjs(record.created_at).format("YYYY-MM-DD HH:mm:ss") : "-"}
                     </Descriptions.Item>
-                    <Descriptions.Item label="更新时间">
+                    <Descriptions.Item label={t('dnsProviderPage.updatedAt')}>
                         {record?.updated_at ? dayjs(record.updated_at).format("YYYY-MM-DD HH:mm:ss") : "-"}
                     </Descriptions.Item>
                 </Descriptions>

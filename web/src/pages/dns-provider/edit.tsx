@@ -2,18 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input, DatePicker, Select } from "antd";
 import dayjs from "dayjs";
+import { useTranslation } from 'react-i18next';
 
 export const DNSEdit = () => {
     const { formProps, saveButtonProps, query } = useForm();
     const [selectedType, setSelectedType] = useState('tencentcloud');
+    const { t } = useTranslation();
 
     const dNSData = query?.data?.data;
 
     const providerOptions = [
-        { label: '腾讯云', value: 'tencentcloud' },
-        { label: '阿里云', value: 'aliyun' },
-        { label: '华为云', value: 'huaweicloud' },
-        { label: '百度云', value: 'baiducloud' },
+        { label: t('dnsProviderPage.tencentcloud'), value: 'tencentcloud' },
+        { label: t('dnsProviderPage.aliyun'), value: 'aliyun' },
+        { label: t('dnsProviderPage.huaweicloud'), value: 'huaweicloud' },
+        { label: t('dnsProviderPage.baiducloud'), value: 'baiducloud' },
         { label: 'Cloudflare', value: 'cloudflare' },
         { label: 'GoDaddy', value: 'godaddy' },
     ];
@@ -83,7 +85,7 @@ export const DNSEdit = () => {
         <Edit saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
                 <Form.Item
-                    label="ID"
+                    label={t('dnsProviderPage.id')}
                     name={["id"]}
                     rules={[
                         {
@@ -94,7 +96,7 @@ export const DNSEdit = () => {
                     <Input readOnly disabled />
                 </Form.Item>
                 <Form.Item
-                    label="创建时间"
+                    label={t('dnsProviderPage.createdAt')}
                     name={["created_at"]}
                     rules={[
                         {
@@ -108,7 +110,7 @@ export const DNSEdit = () => {
                     <DatePicker disabled />
                 </Form.Item>
                 <Form.Item
-                    label="更新时间"
+                    label={t('dnsProviderPage.updatedAt')}
                     name={["updated_at"]}
                     rules={[
                         {
@@ -122,29 +124,29 @@ export const DNSEdit = () => {
                     <DatePicker disabled />
                 </Form.Item>
                 <Form.Item
-                    label="名称"
+                    label={t('dnsProviderPage.name')}
                     name={["name"]}
                     rules={[
                         {
                             required: true,
-                            message: '请输入DNS提供商名称',
+                            message: t('dnsProviderPage.enterName'),
                         },
                     ]}
                 >
-                    <Input placeholder="请输入DNS提供商名称" />
+                    <Input placeholder={t('dnsProviderPage.enterName')} />
                 </Form.Item>
                 <Form.Item
-                    label="厂商类型"
+                    label={t('dnsProviderPage.type')}
                     name={["type"]}
                     rules={[
                         {
                             required: true,
-                            message: '请选择厂商类型',
+                            message: t('dnsProviderPage.selectType'),
                         },
                     ]}
                 >
                     <Select 
-                        placeholder="请选择厂商类型"
+                        placeholder={t('dnsProviderPage.selectType')}
                         options={providerOptions}
                         onChange={handleTypeChange}
                     />
@@ -155,7 +157,7 @@ export const DNSEdit = () => {
                     rules={[
                         {
                             required: true,
-                            message: `请输入${currentKeys.idKey}`,
+                            message: t('dnsProviderPage.enterSecretId', { key: currentKeys.idKey }),
                         },
                     ]}
                 >
@@ -167,14 +169,14 @@ export const DNSEdit = () => {
                     rules={[
                         {
                             required: true,
-                            message: `请输入${currentKeys.keyKey}`,
+                            message: t('dnsProviderPage.enterSecretKey', { key: currentKeys.keyKey }),
                         },
                     ]}
                 >
                     <Input.Password placeholder={currentKeys.keyPlaceholder} />
                 </Form.Item>
                 <Form.Item
-                    label="备注"
+                    label={t('dnsProviderPage.notes')}
                     name={["notes"]}
                     rules={[
                         {
@@ -183,7 +185,7 @@ export const DNSEdit = () => {
                     ]}
                 >
                     <Input.TextArea 
-                        placeholder="请输入备注信息（可选）" 
+                        placeholder={t('dnsProviderPage.enterNotes')} 
                         rows={3}
                         maxLength={200}
                         showCount

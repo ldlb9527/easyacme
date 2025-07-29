@@ -10,6 +10,7 @@ import { Table, Space, Button, Popconfirm, message, Card, Typography, Tag, Selec
 import { DeleteOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from "dayjs";
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -30,6 +31,7 @@ export const DNSList = () => {
     });
     const { token } = theme.useToken();
     const go = useGo();
+    const { t } = useTranslation();
 
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [selectedRows, setSelectedRows] = useState<BaseRecord[]>([]);
@@ -69,14 +71,14 @@ export const DNSList = () => {
     // 获取厂商类型显示名称
     const getProviderTypeName = (type: string) => {
         const typeMap: { [key: string]: { name: string; color: string } } = {
-            'tencentcloud': { name: '腾讯云', color: 'blue' },
-            'aliyun': { name: '阿里云', color: 'orange' },
-            'huaweicloud': { name: '华为云', color: 'red' },
-            'baiducloud': { name: '百度云', color: 'purple' },
+            'tencentcloud': { name: t('dnsProviderPage.tencentcloud'), color: 'blue' },
+            'aliyun': { name: t('dnsProviderPage.aliyun'), color: 'orange' },
+            'huaweicloud': { name: t('dnsProviderPage.huaweicloud'), color: 'red' },
+            'baiducloud': { name: t('dnsProviderPage.baiducloud'), color: 'purple' },
             'cloudflare': { name: 'Cloudflare', color: 'geekblue' },
             'godaddy': { name: 'GoDaddy', color: 'green' },
         };
-        return typeMap[type] || { name: type || '未知', color: 'default' };
+        return typeMap[type] || { name: type || t('dnsProviderPage.unknown'), color: 'default' };
     };
 
     // 获取授权字段的键名
@@ -110,10 +112,10 @@ export const DNSList = () => {
 
     // 厂商类型选项
     const providerTypeOptions = [
-        { label: <Tag color="blue">腾讯云</Tag>, value: 'tencentcloud' },
-        { label: <Tag color="orange">阿里云</Tag>, value: 'aliyun' },
-        { label: <Tag color="red">华为云</Tag>, value: 'huaweicloud' },
-        { label: <Tag color="purple">百度云</Tag>, value: 'baiducloud' },
+        { label: <Tag color="blue">{t('dnsProviderPage.tencentcloud')}</Tag>, value: 'tencentcloud' },
+        { label: <Tag color="orange">{t('dnsProviderPage.aliyun')}</Tag>, value: 'aliyun' },
+        { label: <Tag color="red">{t('dnsProviderPage.huaweicloud')}</Tag>, value: 'huaweicloud' },
+        { label: <Tag color="purple">{t('dnsProviderPage.baiducloud')}</Tag>, value: 'baiducloud' },
         { label: <Tag color="geekblue">Cloudflare</Tag>, value: 'cloudflare' },
         { label: <Tag color="green">GoDaddy</Tag>, value: 'godaddy' },
     ];
@@ -204,12 +206,12 @@ export const DNSList = () => {
                     >
                         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                             <Form.Item
-                                label={<span style={{ fontWeight: 500, color: '#595959' }}>名称</span>}
+                                label={<span style={{ fontWeight: 500, color: '#595959' }}>{t('dnsProviderPage.name')}</span>}
                                 style={{ marginBottom: 0 }}
                             >
                                 <Input.Search
                                     style={{ width: 200 }}
-                                    placeholder="输入名称搜索"
+                                    placeholder={t('dnsProviderPage.searchName')}
                                     value={getCurrentNameFilter()}
                                     onChange={(e) => handleNameSearch(e.target.value)}
                                     onSearch={handleNameSearch}
@@ -217,12 +219,12 @@ export const DNSList = () => {
                                 />
                             </Form.Item>
                             <Form.Item
-                                label={<span style={{ fontWeight: 500, color: '#595959' }}>厂商类型</span>}
+                                label={<span style={{ fontWeight: 500, color: '#595959' }}>{t('dnsProviderPage.type')}</span>}
                                 style={{ marginBottom: 0 }}
                             >
                                 <Select
                                     style={{ width: 140 }}
-                                    placeholder="选择厂商类型"
+                                    placeholder={t('dnsProviderPage.selectType')}
                                     value={getCurrentTypeFilter()}
                                     onChange={handleTypeFilter}
                                     options={providerTypeOptions}
@@ -240,7 +242,7 @@ export const DNSList = () => {
                                 icon={<PlusOutlined />}
                                 onClick={() => go({ to: { resource: "dns/provider", action: "create" } })}
                             >
-                                新建
+                                {t('dnsProviderPage.create')}
                             </Button>
                         </div>
                     </Form>
@@ -260,14 +262,14 @@ export const DNSList = () => {
                         <Space>
                             <Text>已选择 <Text strong>{selectedRowKeys.length}</Text> 项</Text>
                             <Popconfirm
-                                title="批量删除"
-                                description={`确定要删除选中的 ${selectedRowKeys.length} 个DNS提供商吗？此操作不可恢复。`}
+                                title={t('dnsProviderPage.batchDelete')}
+                                description={t('dnsProviderPage.confirmBatchDelete', { count: selectedRowKeys.length })}
                                 onConfirm={handleBatchDelete}
-                                okText="确定"
-                                cancelText="取消"
+                                okText={t('dnsProviderPage.confirm')}
+                                cancelText={t('dnsProviderPage.cancel')}
                             >
                                 <Button size="small" danger icon={<DeleteOutlined />}>
-                                    批量删除
+                                    {t('dnsProviderPage.batchDelete')}
                                 </Button>
                             </Popconfirm>
                             <Button 
@@ -277,7 +279,7 @@ export const DNSList = () => {
                                     setSelectedRows([]);
                                 }}
                             >
-                                取消选择
+                                {t('dnsProviderPage.cancelSelection')}
                             </Button>
                         </Space>
                     </Card>
@@ -355,7 +357,7 @@ export const DNSList = () => {
                     `}</style>
                     <Table.Column
                         dataIndex="name"
-                        title="名称"
+                        title={t('dnsProviderPage.name')}
                         width={120}
                         ellipsis={{
                             showTitle: false,
@@ -382,7 +384,7 @@ export const DNSList = () => {
                     />
                     <Table.Column
                         dataIndex="type"
-                        title="厂商类型"
+                        title={t('dnsProviderPage.type')}
                         width={120}
                         render={(type: string) => {
                             const typeInfo = getProviderTypeName(type);
@@ -391,7 +393,7 @@ export const DNSList = () => {
                     />
                     <Table.Column
                         dataIndex={["created_at"]}
-                        title="创建时间"
+                        title={t('dnsProviderPage.createdAt')}
                         width={180}
                         render={(value: any) =>
                             value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "-"
@@ -399,7 +401,7 @@ export const DNSList = () => {
                     />
                     <Table.Column
                         dataIndex="secret_id"
-                        title="授权ID"
+                        title={t('dnsProviderPage.secretId')}
                         width={300}
                         ellipsis={{
                             showTitle: false,
@@ -412,7 +414,7 @@ export const DNSList = () => {
                     />
                     <Table.Column 
                         dataIndex="notes" 
-                        title="备注" 
+                        title={t('dnsProviderPage.notes')} 
                         width={150}
                         ellipsis={{
                             showTitle: false,
@@ -424,7 +426,7 @@ export const DNSList = () => {
                         )}
                     />
                     <Table.Column
-                        title="操作"
+                        title={t('dnsProviderPage.actions')}
                         dataIndex="actions"
                         width={120}
                         render={(_, record: BaseRecord) => (
@@ -449,11 +451,11 @@ export const DNSList = () => {
                                         color: '#1677ff'
                                     }}
                                 >
-                                    编辑
+                                    {t('dnsProviderPage.edit')}
                                 </Button>
                                 <EditButton hideText size="small" recordItemId={record.id} style={{ display: 'none' }} />
                                 <DeleteButton size="small" recordItemId={record.id}>
-                                    删除
+                                    {t('dnsProviderPage.delete')}
                                 </DeleteButton>
                             </Space>
                         )}
