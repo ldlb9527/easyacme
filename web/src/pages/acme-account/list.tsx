@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import {BaseRecord, useGo, useCustomMutation} from "@refinedev/core";
 import {DateField, DeleteButton, EditButton, EmailField, List, ShowButton, useTable,} from "@refinedev/antd";
 import {Space, Table, Tag, Button, Popconfirm, message, Card, Typography, ConfigProvider, theme, Select, Input, Form} from "antd";
-import {statusMap} from "./status";
+import { getStatusMap } from "./status";
 import { API_BASE_URL } from '../../config';
 import { DeleteOutlined, StopOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from "dayjs";
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -28,6 +29,8 @@ export const ACMEList = () => {
     const { token } = theme.useToken();
     const go = useGo();
     const { mutateAsync } = useCustomMutation();
+    const { t } = useTranslation();
+    const statusMap = getStatusMap();
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [selectedRows, setSelectedRows] = useState<BaseRecord[]>([]);
     
@@ -43,12 +46,12 @@ export const ACMEList = () => {
                     })
                 )
             );
-            message.success(`成功删除 ${selectedRows.length} 个账户`);
+            message.success(t('acmeAccountPage.batchDeleteSuccess', { count: selectedRows.length }));
             setSelectedRowKeys([]);
             setSelectedRows([]);
             tableQueryResult.refetch();
         } catch (error) {
-            message.error("批量删除失败: " + (error as any).message);
+            message.error(t('acmeAccountPage.batchDeleteFailed') + (error as any).message);
         }
     };
 
@@ -64,12 +67,12 @@ export const ACMEList = () => {
                     })
                 )
             );
-            message.success(`成功吊销 ${selectedRows.length} 个账户`);
+            message.success(t('acmeAccountPage.batchDeactivateSuccess', { count: selectedRows.length }));
             setSelectedRowKeys([]);
             setSelectedRows([]);
             tableQueryResult.refetch();
         } catch (error) {
-            message.error("批量吊销失败: " + (error as any).message);
+            message.error(t('acmeAccountPage.batchDeactivateFailed') + (error as any).message);
         }
     };
 
@@ -90,8 +93,8 @@ export const ACMEList = () => {
 
     // EAB绑定选项
     const eabOptions = [
-        { label: <Tag color="green">是</Tag>, value: true },
-        { label: <Tag color="default">否</Tag>, value: false },
+        { label: <Tag color="green">{t('acmeAccountPage.yesOption')}</Tag>, value: true },
+        { label: <Tag color="default">{t('acmeAccountPage.noOption')}</Tag>, value: false },
     ];
 
     // 获取当前筛选值
@@ -163,12 +166,12 @@ export const ACMEList = () => {
                     >
                         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                             <Form.Item
-                                label={<span style={{ fontWeight: 500, color: '#595959' }}>名称</span>}
+                                label={<span style={{ fontWeight: 500, color: '#595959' }}>{t('acmeAccountPage.name')}</span>}
                                 style={{ marginBottom: 0 }}
                             >
                                 <Input.Search
                                     style={{ width: 200 }}
-                                    placeholder="输入名称搜索"
+                                    placeholder={t('acmeAccountPage.searchName')}
                                     value={currentNameFilter}
                                     onChange={(e) => handleNameSearch(e.target.value)}
                                     onSearch={handleNameSearch}
@@ -176,12 +179,12 @@ export const ACMEList = () => {
                                 />
                             </Form.Item>
                             <Form.Item
-                                label={<span style={{ fontWeight: 500, color: '#595959' }}>状态</span>}
+                                label={<span style={{ fontWeight: 500, color: '#595959' }}>{t('acmeAccountPage.status')}</span>}
                                 style={{ marginBottom: 0 }}
                             >
                                 <Select
                                     style={{ width: 140 }}
-                                    placeholder="选择状态"
+                                    placeholder={t('acmeAccountPage.selectStatus')}
                                     value={currentStatusFilter}
                                     onChange={handleStatusFilter}
                                     options={statusOptions}
@@ -193,12 +196,12 @@ export const ACMEList = () => {
                                 />
                             </Form.Item>
                             <Form.Item
-                                label={<span style={{ fontWeight: 500, color: '#595959' }}>绑定EAB</span>}
+                                label={<span style={{ fontWeight: 500, color: '#595959' }}>{t('acmeAccountPage.bindEAB')}</span>}
                                 style={{ marginBottom: 0 }}
                             >
                                 <Select
                                     style={{ width: 120 }}
-                                    placeholder="选择EAB"
+                                    placeholder={t('acmeAccountPage.selectEAB')}
                                     value={currentEabFilter}
                                     onChange={handleEabFilter}
                                     options={eabOptions}
@@ -216,7 +219,7 @@ export const ACMEList = () => {
                                 icon={<PlusOutlined />}
                                 onClick={() => go({ to: { resource: "acme/accounts", action: "create" } })}
                             >
-                                新建
+                                {t('acmeAccountPage.create')}
                             </Button>
                         </div>
                     </Form>
@@ -236,25 +239,25 @@ export const ACMEList = () => {
                         <Space>
                             <Text>已选择 <Text strong>{selectedRowKeys.length}</Text> 项</Text>
                             <Popconfirm
-                                title="批量吊销"
-                                description={`确定要吊销选中的 ${selectedRowKeys.length} 个账户吗？`}
+                                title={t('acmeAccountPage.batchDeactivate')}
+                                description={t('acmeAccountPage.confirmBatchDeactivate', { count: selectedRowKeys.length })}
                                 onConfirm={handleBatchDeactivate}
-                                okText="确定"
-                                cancelText="取消"
+                                okText={t('acmeAccountPage.confirm')}
+                                cancelText={t('acmeAccountPage.cancel')}
                             >
                                 <Button size="small" icon={<StopOutlined />}>
-                                    批量吊销
+                                    {t('acmeAccountPage.batchDeactivate')}
                                 </Button>
                             </Popconfirm>
                             <Popconfirm
-                                title="批量删除"
-                                description={`确定要删除选中的 ${selectedRowKeys.length} 个账户吗？此操作不可恢复。`}
+                                title={t('acmeAccountPage.batchDelete')}
+                                description={t('acmeAccountPage.confirmBatchDelete', { count: selectedRowKeys.length })}
                                 onConfirm={handleBatchDelete}
-                                okText="确定"
-                                cancelText="取消"
+                                okText={t('acmeAccountPage.confirm')}
+                                cancelText={t('acmeAccountPage.cancel')}
                             >
                                 <Button size="small" danger icon={<DeleteOutlined />}>
-                                    批量删除
+                                    {t('acmeAccountPage.batchDelete')}
                                 </Button>
                             </Popconfirm>
                             <Button 
@@ -264,7 +267,7 @@ export const ACMEList = () => {
                                     setSelectedRows([]);
                                 }}
                             >
-                                取消选择
+                                {t('acmeAccountPage.cancelSelection')}
                             </Button>
                         </Space>
                     </Card>
@@ -342,7 +345,7 @@ export const ACMEList = () => {
                     `}</style>
                     <Table.Column
                         dataIndex="name"
-                        title="名称"
+                        title={t('acmeAccountPage.name')}
                         width={120}
                         ellipsis={{
                             showTitle: false,
@@ -370,7 +373,7 @@ export const ACMEList = () => {
 
                     <Table.Column
                         dataIndex={["created_at"]}
-                        title="创建时间"
+                        title={t('acmeAccountPage.createdAt')}
                         width={180}
                         render={(value: any) =>
                             value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "-"
@@ -379,7 +382,7 @@ export const ACMEList = () => {
 
                     <Table.Column 
                         dataIndex="key_type" 
-                        title="账户私钥类型" 
+                        title={t('acmeAccountPage.keyType')} 
                         width={150}
                         ellipsis={{
                             showTitle: false,
@@ -392,7 +395,7 @@ export const ACMEList = () => {
                     />
                     <Table.Column 
                         dataIndex="server" 
-                        title="ACME Server"
+                        title={t('acmeAccountPage.acmeServer')}
                         width={200}
                         ellipsis={{
                             showTitle: false,
@@ -405,7 +408,7 @@ export const ACMEList = () => {
                     />
                     <Table.Column
                         dataIndex={["email"]}
-                        title="邮箱"
+                        title={t('acmeAccountPage.email')}
                         width={200}
                         ellipsis={{
                             showTitle: false,
@@ -418,7 +421,7 @@ export const ACMEList = () => {
                     />
                     <Table.Column
                         dataIndex="status"
-                        title="状态"
+                        title={t('acmeAccountPage.status')}
                         width={100}
                         render={(value: string) => (
                             <Tag color={(statusMap as Record<string, any>)[value]?.color || "default"}>
@@ -429,18 +432,18 @@ export const ACMEList = () => {
 
                     <Table.Column 
                         dataIndex="eab_key_id"
-                        title="绑定EAB"
+                        title={t('acmeAccountPage.bindEAB')}
                         width={100}
                         render={(value: string) => (
                             value && value.length > 0 ? (
-                                <Tag color="green">是</Tag>
+                                <Tag color="green">{t('acmeAccountPage.yesOption')}</Tag>
                             ) : (
-                                <Tag color="default">否</Tag>
+                                <Tag color="default">{t('acmeAccountPage.noOption')}</Tag>
                             )
                         )}
                     />
                     <Table.Column
-                        title="操作"
+                        title={t('acmeAccountPage.actions')}
                         dataIndex="actions"
                         width={160}
                         render={(_, record: BaseRecord) => (
@@ -465,13 +468,13 @@ export const ACMEList = () => {
                                         color: '#1677ff'
                                     }}
                                 >
-                                    编辑
+                                    {t('acmeAccountPage.edit')}
                                 </Button>
                                 <EditButton hideText size="small" recordItemId={record.id} style={{ display: 'none' }} />
                                 <ShowButton hideText size="small" recordItemId={record.id} style={{ display: 'none' }} />
                                 <Popconfirm
-                                    title="吊销账户"
-                                    description="你确定要吊销此ACME账户吗？"
+                                    title={t('acmeAccountPage.deactivateAccount')}
+                                    description={t('acmeAccountPage.confirmDeactivate')}
                                     onConfirm={async () => {
                                         if (record.id) {
                                             try {
@@ -480,22 +483,22 @@ export const ACMEList = () => {
                                                     method: "post",
                                                     values: {},
                                                 });
-                                                message.success("账户吊销成功");
+                                                message.success(t('acmeAccountPage.deactivateSuccess'));
                                                 tableQueryResult.refetch();
                                             } catch (error) {
-                                                message.error("账户吊销失败: " + (error as any).message);
+                                                message.error(t('acmeAccountPage.deactivateFailed') + (error as any).message);
                                             }
                                         }
                                     }}
-                                    okText="是"
-                                    cancelText="否"
+                                    okText={t('acmeAccountPage.yesOption')}
+                                    cancelText={t('acmeAccountPage.noOption')}
                                 >
                                     <Button size="small" danger>
-                                        吊销
+                                        {t('acmeAccountPage.deactivate')}
                                     </Button>
                                 </Popconfirm>
                                 <DeleteButton size="small" recordItemId={record.id}>
-                                    删除
+                                    {t('acmeAccountPage.delete')}
                                 </DeleteButton>
                             </Space>
                         )}

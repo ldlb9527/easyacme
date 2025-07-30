@@ -2,17 +2,18 @@ import React from "react";
 import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input, DatePicker } from "antd";
 import dayjs from "dayjs";
+import { useTranslation } from 'react-i18next';
 
 export const ACMEEdit = () => {
     const { formProps, saveButtonProps, query } = useForm();
-
+    const { t } = useTranslation();
     const aCMEData = query?.data?.data;
 
     return (
         <Edit saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
                 <Form.Item
-                    label="Id"
+                    label={t('acmeAccountPage.id')}
                     name={["id"]}
                     rules={[
                         {
@@ -23,7 +24,7 @@ export const ACMEEdit = () => {
                     <Input readOnly disabled />
                 </Form.Item>
                 <Form.Item
-                    label="Created At"
+                    label={t('acmeAccountPage.createdAt')}
                     name={["created_at"]}
                     rules={[
                         {
@@ -37,7 +38,7 @@ export const ACMEEdit = () => {
                     <DatePicker />
                 </Form.Item>
                 <Form.Item
-                    label="Updated At"
+                    label={t('acmeAccountPage.updatedAt')}
                     name={["updated_at"]}
                     rules={[
                         {
@@ -51,7 +52,7 @@ export const ACMEEdit = () => {
                     <DatePicker />
                 </Form.Item>
                 <Form.Item
-                    label="Name"
+                    label={t('acmeAccountPage.name')}
                     name={["name"]}
                     rules={[
                         {
@@ -62,7 +63,7 @@ export const ACMEEdit = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Key Pem"
+                    label={t('acmeAccountPage.keyPem')}
                     name="key_pem"
                     rules={[
                         {
@@ -73,7 +74,7 @@ export const ACMEEdit = () => {
                     <Input.TextArea rows={5} />
                 </Form.Item>
                 <Form.Item
-                    label="Key Type"
+                    label={t('acmeAccountPage.keyType')}
                     name={["key_type"]}
                     rules={[
                         {
@@ -84,7 +85,7 @@ export const ACMEEdit = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Uri"
+                    label={t('acmeAccountPage.uri')}
                     name={["uri"]}
                     rules={[
                         {
@@ -95,7 +96,7 @@ export const ACMEEdit = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Server"
+                    label={t('acmeAccountPage.server')}
                     name={["server"]}
                     rules={[
                         {
@@ -106,7 +107,7 @@ export const ACMEEdit = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Email"
+                    label={t('acmeAccountPage.email')}
                     name={["email"]}
                     rules={[
                         {
@@ -117,7 +118,7 @@ export const ACMEEdit = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Status"
+                    label={t('acmeAccountPage.status')}
                     name={["status"]}
                     rules={[
                         {
@@ -128,7 +129,7 @@ export const ACMEEdit = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Eab Mac Key"
+                    label={t('acmeAccountPage.eabHmacKey')}
                     name={["eab_mac_key"]}
                     rules={[
                         {

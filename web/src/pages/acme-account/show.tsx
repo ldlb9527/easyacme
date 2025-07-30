@@ -16,16 +16,12 @@ import {
 } from "antd";
 import { CopyOutlined, EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useTranslation } from 'react-i18next';
+import { getStatusMap } from "./status";
 
 const { Title, Text } = Typography;
 
-const statusMap = {
-    valid: { color: "green", label: "有效" },
-    revoked: { color: "red", label: "已吊销" },
-    deactivated: { color: "orange", label: "已停用" },
-};
-
-const copyToClipboard = (text) => {
+const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     message.success("已复制到剪贴板");
 };
@@ -36,6 +32,8 @@ export const ACMEShow = () => {
     const record = data?.data;
     const [showKeyPem, setShowKeyPem] = useState(false);
     const [showEabMacKey, setShowEabMacKey] = useState(false);
+    const { t } = useTranslation();
+    const statusMap = getStatusMap();
 
     return (
         <Show isLoading={isLoading}>
@@ -69,18 +67,18 @@ export const ACMEShow = () => {
                         <Row gutter={16} align="middle" style={{ marginBottom: 16 }}>
                             <Col flex="auto">
                                 <Title level={3} style={{ margin: 0 }}>
-                                    {record?.name || "ACME 账户"}
+                                    {record?.name || t('acmeAccountPage.details')}
                                 </Title>
                                 <Text type="secondary" style={{ fontSize: 16 }}>
-                                    ID: {record?.id}
+                                    {t('acmeAccountPage.id')}: {record?.id}
                                 </Text>
                             </Col>
                         </Row>
                         <Row style={{ marginBottom: 24 }}>
                             <Col>
-                                <Text strong style={{ marginRight: 8 }}>状态：</Text>
-                                <Tag color={statusMap[record?.status]?.color || "default"} style={{ fontSize: 16, padding: "4px 16px" }}>
-                                    {statusMap[record?.status]?.label || record?.status}
+                                <Text strong style={{ marginRight: 8 }}>{t('acmeAccountPage.status')}：</Text>
+                                <Tag color={(statusMap as Record<string, any>)[record?.status]?.color || "default"} style={{ fontSize: 16, padding: "4px 16px" }}>
+                                    {(statusMap as Record<string, any>)[record?.status]?.label || record?.status}
                                 </Tag>
                             </Col>
                         </Row>
@@ -94,10 +92,10 @@ export const ACMEShow = () => {
                             bordered
                             style={{ background: "#fff", padding: 16, borderRadius: 8 }}
                         >
-                            <Descriptions.Item label="邮箱">{record?.email}</Descriptions.Item>
-                            <Descriptions.Item label="Key 类型">{record?.key_type}</Descriptions.Item>
-                            <Descriptions.Item label="EAB Key ID">{record?.eab_key_id}</Descriptions.Item>
-                            <Descriptions.Item label="EAB HMac Key">
+                            <Descriptions.Item label={t('acmeAccountPage.email')}>{record?.email}</Descriptions.Item>
+                            <Descriptions.Item label={t('acmeAccountPage.keyType')}>{record?.key_type}</Descriptions.Item>
+                            <Descriptions.Item label={t('acmeAccountPage.eabKeyId')}>{record?.eab_key_id}</Descriptions.Item>
+                            <Descriptions.Item label={t('acmeAccountPage.eabHmacKey')}>
                                 <Space>
                                     <Text copyable={{ text: record?.eab_mac_key }}>
                                         {showEabMacKey ? record?.eab_mac_key : "******"}
@@ -109,12 +107,12 @@ export const ACMEShow = () => {
                                     />
                                 </Space>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Uri">{record?.uri}</Descriptions.Item>
-                            <Descriptions.Item label="Server">{record?.server}</Descriptions.Item>
-                            <Descriptions.Item label="创建时间">
+                            <Descriptions.Item label={t('acmeAccountPage.uri')}>{record?.uri}</Descriptions.Item>
+                            <Descriptions.Item label={t('acmeAccountPage.server')}>{record?.server}</Descriptions.Item>
+                            <Descriptions.Item label={t('acmeAccountPage.createdAt')}>
                                 {record?.created_at ? dayjs(record.created_at).format("YYYY-MM-DD HH:mm:ss") : "-"}
                             </Descriptions.Item>
-                            <Descriptions.Item label="更新时间">
+                            <Descriptions.Item label={t('acmeAccountPage.updatedAt')}>
                                 {record?.updated_at ? dayjs(record.updated_at).format("YYYY-MM-DD HH:mm:ss") : "-"}
                             </Descriptions.Item>
                         </Descriptions>
@@ -123,7 +121,7 @@ export const ACMEShow = () => {
 
                         {/* 私钥 Key Pem 区块 */}
                         <div style={{ marginTop: 16, display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                            <Text strong style={{ marginBottom: 8 }}>私钥 Key Pem</Text>
+                            <Text strong style={{ marginBottom: 8 }}>{t('acmeAccountPage.keyPem')}</Text>
                             <div
                                 style={{
                                     position: "relative",
@@ -142,14 +140,17 @@ export const ACMEShow = () => {
                             >
                                 {/* 复制和显示/隐藏按钮，放在框内右上角 */}
                                 <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 8 }}>
-                                    <Tooltip title="复制">
+                                    <Tooltip title={t('acmeAccountPage.copied')}>
                                         <Button
                                             size="small"
                                             icon={<CopyOutlined />}
-                                            onClick={() => copyToClipboard(record?.key_pem)}
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(record?.key_pem);
+                                                message.success(t('acmeAccountPage.copied'));
+                                            }}
                                         />
                                     </Tooltip>
-                                    <Tooltip title={showKeyPem ? "隐藏" : "显示"}>
+                                    <Tooltip title={showKeyPem ? t('acmeAccountPage.noOption') : t('acmeAccountPage.yesOption')}>
                                         <Button
                                             size="small"
                                             icon={showKeyPem ? <EyeInvisibleOutlined /> : <EyeOutlined />}

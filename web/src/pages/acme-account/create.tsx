@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, Select, Typography, Divider, Alert } from "antd";
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -13,39 +14,41 @@ const keyTypeOptions = [
     { label: "RSA8192", value: "8192" },
 ];
 
-const serverOptions = [
-    {
-        label: (
-            <span>
-                Let's Encrypt{" "}
-                <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
-                    https://acme-v02.api.letsencrypt.org/directory
-                </Text>
-            </span>
-        ),
-        value: "https://acme-v02.api.letsencrypt.org/directory",
-    },
-    {
-        label: (
-            <span>
-                Let's Encrypt Staging{" "}
-                <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
-                    https://acme-staging-v02.api.letsencrypt.org/directory
-                </Text>
-            </span>
-        ),
-        value: "https://acme-staging-v02.api.letsencrypt.org/directory",
-    },
-];
-
 export const ACMECreate = () => {
     const { formProps, saveButtonProps } = useForm();
+    const { t } = useTranslation();
     // 受控 value
-    const [serverValue, setServerValue] = useState(serverOptions[0].value);
+    const [serverValue, setServerValue] = useState("https://acme-v02.api.letsencrypt.org/directory");
     const [searchInput, setSearchInput] = useState("");
 
+    // 服务器选项
+    const serverOptions = [
+        {
+            label: (
+                <span>
+                    Let's Encrypt{" "}
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                        https://acme-v02.api.letsencrypt.org/directory
+                    </Text>
+                </span>
+            ),
+            value: "https://acme-v02.api.letsencrypt.org/directory",
+        },
+        {
+            label: (
+                <span>
+                    Let's Encrypt Staging{" "}
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                        https://acme-staging-v02.api.letsencrypt.org/directory
+                    </Text>
+                </span>
+            ),
+            value: "https://acme-staging-v02.api.letsencrypt.org/directory",
+        },
+    ];
+
     // 判断是否为预设选项
-    const isPreset = (value) => serverOptions.some(opt => opt.value === value);
+    const isPreset = (value: string) => serverOptions.some(opt => opt.value === value);
 
     // 生成下拉选项
     const getOptions = () => {
@@ -55,7 +58,6 @@ export const ACMECreate = () => {
                 {
                     label: (
                         <span>
-
                             <Text code>{searchInput}</Text>
                         </span>
                     ),
@@ -67,22 +69,22 @@ export const ACMECreate = () => {
     };
 
     // 选中/输入时同步到表单
-    const handleServerChange = (value) => {
+    const handleServerChange = (value: string) => {
         setServerValue(value);
-        formProps.form.setFieldsValue({ server: value });
+        formProps.form?.setFieldsValue({ server: value });
     };
 
     // 输入时
-    const handleServerSearch = (input) => {
+    const handleServerSearch = (input: string) => {
         setSearchInput(input);
         // 让输入内容成为 value
         setServerValue(input);
-        formProps.form.setFieldsValue({ server: input });
+        formProps.form?.setFieldsValue({ server: input });
     };
 
     // 初始化表单时同步 value
     React.useEffect(() => {
-        formProps.form.setFieldsValue({ server: serverValue });
+        formProps.form?.setFieldsValue({ server: serverValue });
     }, [formProps.form, serverValue]);
 
     return (
@@ -92,61 +94,61 @@ export const ACMECreate = () => {
                 layout="vertical"
                 initialValues={{
                     key_type: "P256",
-                    server: serverOptions[0].value
+                    server: "https://acme-v02.api.letsencrypt.org/directory"
                 }}
             >
                 <Form.Item
-                    label="Name"
+                    label={t('acmeAccountPage.name')}
                     name={["name"]}
-                    rules={[{ required: true, message: "请输入名称" }]}
+                    rules={[{ required: true, message: t('acmeAccountPage.enterName') }]}
                 >
-                    <Input placeholder="请输入名称" />
+                    <Input placeholder={t('acmeAccountPage.enterName')} />
                 </Form.Item>
 
                 <Form.Item
-                    label="Key Type"
+                    label={t('acmeAccountPage.keyType')}
                     name={["key_type"]}
-                    rules={[{ required: true, message: "请选择密钥类型" }]}
+                    rules={[{ required: true, message: t('common.pleaseSelect', { field: t('acmeAccountPage.keyType') }) }]}
                 >
                     <Select
-                        placeholder="请选择密钥类型"
+                        placeholder={t('common.pleaseSelect', { field: t('acmeAccountPage.keyType') })}
                         options={keyTypeOptions}
                     />
                 </Form.Item>
 
                 <Form.Item
-                    label="Server"
+                    label={t('acmeAccountPage.server')}
                     name={["server"]}
                     rules={[
-                        { required: true, message: "请选择或输入服务器地址" },
+                        { required: true, message: t('common.pleaseSelectOrEnter', { field: t('acmeAccountPage.server') }) },
                         {
                             validator: (_, value) => {
-                                if (!value) return Promise.reject("请选择或输入服务器地址");
+                                if (!value) return Promise.reject(t('common.pleaseSelectOrEnter', { field: t('acmeAccountPage.server') }));
                                 try {
                                     new URL(value);
                                     return Promise.resolve();
                                 } catch {
-                                    return Promise.reject("请输入有效的 URL 地址");
+                                    return Promise.reject(t('common.pleaseEnterValidUrl'));
                                 }
                             }
                         }
                     ]}
                     extra={
                         <Text type="secondary">
-                            你可以选择上方预设服务器，或直接输入自定义 ACME 服务器地址
+                            {t('acmeAccountPage.serverHelp')}
                         </Text>
                     }
                 >
                     <Select
                         showSearch
                         allowClear={false}
-                        placeholder="请选择或输入 ACME 服务器地址"
-                        optionFilterProp="children"
+                        placeholder={t('common.pleaseSelectOrEnter', { field: t('acmeAccountPage.server') })}
+                        optionFilterProp="label"
                         filterOption={(input, option) =>
-                            (option?.children?.toString() ?? '').toLowerCase().includes(input.toLowerCase()) ||
+                            (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase()) ||
                             (option?.value ?? '').toLowerCase().includes(input.toLowerCase())
                         }
-                        notFoundContent={<Text type="secondary">输入自定义 ACME 服务器地址</Text>}
+                        notFoundContent={<Text type="secondary">{t('acmeAccountPage.enterCustomServer')}</Text>}
                         options={getOptions()}
                         value={serverValue}
                         onChange={handleServerChange}
@@ -162,7 +164,7 @@ export const ACMECreate = () => {
                             style={{ marginBottom: 16 }}
                             message={
                                 <span>
-                                    当前已选择自定义 ACME 服务器地址：<Text code>{serverValue}</Text>
+                                    {t('acmeAccountPage.customServerSelected')}<Text code>{serverValue}</Text>
                                 </span>
                             }
                         />
@@ -170,14 +172,14 @@ export const ACMECreate = () => {
                 }
 
                 <Form.Item
-                    label="Email"
+                    label={t('acmeAccountPage.email')}
                     name={["email"]}
                     rules={[
-                        { required: true, message: "请输入邮箱" },
-                        { type: 'email', message: "请输入有效的邮箱地址" }
+                        { required: true, message: t('common.pleaseEnter', { field: t('acmeAccountPage.email') }) },
+                        { type: 'email', message: t('common.pleaseEnterValidEmail') }
                     ]}
                 >
-                    <Input placeholder="请输入邮箱地址" />
+                    <Input placeholder={t('common.pleaseEnter', { field: t('acmeAccountPage.email') })} />
                 </Form.Item>
 
                 {/* EAB参数区块 */}
@@ -194,7 +196,7 @@ export const ACMECreate = () => {
                 >
                     <Text strong style={{ fontSize: 16 }}>External Account Binding</Text>
                     <Text type="secondary" style={{ marginLeft: 12, fontSize: 12 }}>
-                        可选配置项
+                        {t('common.optional')}
                     </Text>
                     <div style={{ marginTop: 16 }}>
                         <Form.Item
@@ -203,7 +205,7 @@ export const ACMECreate = () => {
                             rules={[{ required: false }]}
                             style={{ marginBottom: 12 }}
                         >
-                            <Input placeholder="请输入 EAB KID" />
+                            <Input placeholder={t('common.pleaseEnter', { field: 'EAB KID' })} />
                         </Form.Item>
                         <Form.Item
                             label="EAB HMAC KEY"
@@ -211,7 +213,7 @@ export const ACMECreate = () => {
                             rules={[{ required: false }]}
                             style={{ marginBottom: 0 }}
                         >
-                            <Input placeholder="请输入 EAB HMAC KEY" />
+                            <Input placeholder={t('common.pleaseEnter', { field: 'EAB HMAC KEY' })} />
                         </Form.Item>
                     </div>
                 </div>
