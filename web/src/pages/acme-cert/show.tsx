@@ -9,18 +9,22 @@ import {
 import { Typography, Card, Col, Row, Button, message, Tooltip, Tag } from "antd";
 import { API_BASE_URL } from "../../config";
 import { CopyOutlined } from "@ant-design/icons";
+import { useTranslation } from 'react-i18next';
+import { getStatusMap } from "./status";
 
 const { Title, Text } = Typography;
 
 const CodeBlock = ({ code, maxHeight = "300px" }: { code?: string; maxHeight?: string }) => {
+    const { t } = useTranslation();
+    
     if (!code) {
-        return <Text type="secondary">暂无数据</Text>;
+        return <Text type="secondary">{t('acmeCertPage.noData')}</Text>;
     }
-
+    
     const handleCopy = () => {
         if(code) {
             navigator.clipboard.writeText(code);
-            message.success("已复制到剪贴板");
+            message.success(t('acmeCertPage.copiedToClipboard'));
         }
     };
 
@@ -35,7 +39,7 @@ const CodeBlock = ({ code, maxHeight = "300px" }: { code?: string; maxHeight?: s
                 overflow: "auto",
             }}
         >
-            <Tooltip title="复制">
+            <Tooltip title={t('acmeCertPage.copy')}>
                 <Button
                     icon={<CopyOutlined />}
                     onClick={handleCopy}
@@ -66,6 +70,8 @@ export const CertShow = () => {
     const { query } = useShow();
     const { data, isLoading } = query;
     const record = data?.data;
+    const { t } = useTranslation();
+    const statusMap = getStatusMap();
 
     const [privateKey, setPrivateKey] = useState<string | null>(null);
 
@@ -87,35 +93,25 @@ export const CertShow = () => {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || "获取私钥失败");
+                throw new Error(errorData.error || t('acmeCertPage.getPrivateKeyFailed'));
             }
             const data = await response.json();
             setPrivateKey(data?.private_key);
         } catch (error) {
-            message.error("获取私钥失败: " + (error as any).message);
+            message.error(t('acmeCertPage.getPrivateKeyFailed') + ": " + (error as any).message);
         } finally {
             setIsFetchingPrivateKey(false);
         }
     };
 
     const getStatusText = (status?: string) => {
-        switch (status) {
-            case 'issued': return '已签发';
-            case 'expired': return '已过期';
-            case 'not_issued': return '未签发';
-            case 'revoked': return '已吊销';
-            default: return status || '-';
-        }
+        if (!status) return '-';
+        return (statusMap as Record<string, any>)[status]?.label || status;
     };
 
     const getStatusColor = (status?: string) => {
-        switch (status) {
-            case 'issued': return 'green';
-            case 'expired': return 'red';
-            case 'not_issued': return 'orange';
-            case 'revoked': return 'gray';
-            default: return 'default';
-        }
+        if (!status) return 'default';
+        return (statusMap as Record<string, any>)[status]?.color || 'default';
     };
 
     const calculateRemainingDays = (issuedAt: string | null, validityDays: number) => {
@@ -130,12 +126,12 @@ export const CertShow = () => {
         const remainingDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
 
         if (remainingDays <= 0) {
-            return { text: '已过期', color: 'red' };
+            return { text: t('acmeCertPage.expired'), color: 'red' };
         }
         if (remainingDays <= 30) {
-            return { text: `${remainingDays}天`, color: 'orange' };
+            return { text: `${remainingDays}${t('acmeCertPage.days')}`, color: 'orange' };
         }
-        return { text: `${remainingDays}天`, color: 'green' };
+        return { text: `${remainingDays}${t('acmeCertPage.days')}`, color: 'green' };
     };
 
     const remaining = record ? calculateRemainingDays(record.issued_at, record.validity_days) : { text: '-', color: 'default' };
@@ -144,12 +140,12 @@ export const CertShow = () => {
         <Show isLoading={isLoading}>
             <Row gutter={24}>
                 <Col span={12}>
-                    <InfoItem title="ID">
+                    <InfoItem title={t('acmeCertPage.id')}>
                         <TextField value={record?.id} />
                     </InfoItem>
                 </Col>
                 <Col span={12}>
-                    <InfoItem title="域名">
+                    <InfoItem title={t('acmeCertPage.domains')}>
                         {record?.domains?.map((item: any) => (
                             <TagField value={item} key={item} style={{ marginRight: 4 }}/>
                         ))}
@@ -159,24 +155,24 @@ export const CertShow = () => {
 
             <Row gutter={24}>
                 <Col span={6}>
-                    <InfoItem title="状态">
+                    <InfoItem title={t('acmeCertPage.status')}>
                         <Tag color={getStatusColor(record?.cert_status)}>
                             {getStatusText(record?.cert_status)}
                         </Tag>
                     </InfoItem>
                 </Col>
                  <Col span={6}>
-                    <InfoItem title="密钥类型">
+                    <InfoItem title={t('acmeCertPage.keyType')}>
                         <TextField value={record?.key_type} />
                     </InfoItem>
                 </Col>
                 <Col span={6}>
-                    <InfoItem title="证书类型">
+                    <InfoItem title={t('acmeCertPage.certificateType')}>
                         <TextField value={record?.cert_type} />
                     </InfoItem>
                 </Col>
                 <Col span={6}>
-                    <InfoItem title="剩余有效期">
+                    <InfoItem title={t('acmeCertPage.remainingDays')}>
                         <Tag color={remaining.color}>{remaining.text}</Tag>
                     </InfoItem>
                 </Col>
@@ -184,18 +180,18 @@ export const CertShow = () => {
 
             <Row gutter={24}>
                 <Col span={12}>
-                    <InfoItem title="签发时间">
+                    <InfoItem title={t('acmeCertPage.issuedAt')}>
                         <DateField value={record?.issued_at} format="YYYY-MM-DD HH:mm:ss" />
                     </InfoItem>
                 </Col>
                 <Col span={12}>
-                    <InfoItem title="创建时间">
+                    <InfoItem title={t('acmeCertPage.createdAt')}>
                         <DateField value={record?.created_at} format="YYYY-MM-DD HH:mm:ss" />
                     </InfoItem>
                 </Col>
             </Row>
             
-            <InfoItem title="私钥">
+            <InfoItem title={t('acmeCertPage.privateKey')}>
                 {privateKey ? (
                     <CodeBlock code={privateKey} />
                 ) : (
@@ -204,20 +200,20 @@ export const CertShow = () => {
                             onClick={handleViewPrivateKey}
                             loading={isFetchingPrivateKey}
                         >
-                            查看私钥
+                            {t('acmeCertPage.viewPrivateKey')}
                         </Button>
                     )
                 )}
             </InfoItem>
             
-            <InfoItem title="证书链">
+            <InfoItem title={t('acmeCertPage.certChain')}>
                 <CodeBlock code={record?.certificate} />
             </InfoItem>
             
-            <InfoItem title="证书 URL">
+            <InfoItem title={t('acmeCertPage.certUrl')}>
                 <TextField copyable value={record?.cert_url} />
             </InfoItem>
-            <InfoItem title="证书稳定 URL">
+            <InfoItem title={t('acmeCertPage.certStableUrl')}>
                 <TextField copyable value={record?.cert_stable_url} />
             </InfoItem>
         </Show>

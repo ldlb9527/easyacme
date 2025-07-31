@@ -11,6 +11,8 @@ import zhCN from 'antd/locale/zh_CN';
 import { CertApply } from "./create";
 import { API_BASE_URL } from '../../config';
 import { ReloadOutlined } from "@ant-design/icons";
+import { useTranslation } from 'react-i18next';
+import { getStatusMap } from "./status";
 
 export const CertList = () => {
     const [localFilters, setLocalFilters] = useState<any[]>([]);
@@ -31,6 +33,8 @@ export const CertList = () => {
     const { token } = theme.useToken();
     const go = useGo();
     const { mutateAsync } = useCustomMutation();
+    const { t } = useTranslation();
+    const statusMap = getStatusMap();
 
     const { data: canAccessPrivateKey } = useCan({
         resource: "acme/certificates",
@@ -41,38 +45,24 @@ export const CertList = () => {
     // 证书类型选项
     const certTypeOptions = [
         { 
-            label: <Tag color="blue">DV</Tag>, 
+            label: <Tag color="blue">{t('acmeCertPage.typeDV')}</Tag>, 
             value: "DV" 
         },
         { 
-            label: <Tag color="purple">OV</Tag>, 
+            label: <Tag color="purple">{t('acmeCertPage.typeOV')}</Tag>, 
             value: "OV" 
         },
         { 
-            label: <Tag color="gold">EV</Tag>, 
+            label: <Tag color="gold">{t('acmeCertPage.typeEV')}</Tag>, 
             value: "EV" 
         },
     ];
 
     // 状态选项
-    const statusOptions = [
-        { 
-            label: <Tag color="green">已签发</Tag>, 
-            value: "issued" 
-        },
-        { 
-            label: <Tag color="red">已过期</Tag>, 
-            value: "expired" 
-        },
-        { 
-            label: <Tag color="orange">未签发</Tag>, 
-            value: "not_issued" 
-        },
-        { 
-            label: <Tag color="gray">已吊销</Tag>, 
-            value: "revoked" 
-        },
-    ];
+    const statusOptions = Object.entries(statusMap).map(([key, value]) => ({
+        label: <Tag color={value.color}>{value.label}</Tag>,
+        value: key,
+    }));
 
     // 处理域名搜索
     const handleDomainSearch = (value: string) => {
@@ -170,36 +160,14 @@ export const CertList = () => {
         setLocalFilters([]);
     };
 
-    // 状态颜色映射
+    // 获取状态颜色
     const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'issued':
-                return 'green';
-            case 'expired':
-                return 'red';
-            case 'not_issued':
-                return 'orange';
-            case 'revoked':
-                return 'gray';
-            default:
-                return 'default';
-        }
+        return (statusMap as Record<string, any>)[status]?.color || 'default';
     };
 
-    // 状态显示文本映射
+    // 获取状态显示文本
     const getStatusText = (status: string) => {
-        switch (status) {
-            case 'issued':
-                return '已签发';
-            case 'expired':
-                return '已过期';
-            case 'not_issued':
-                return '未签发';
-            case 'revoked':
-                return '已吊销';
-            default:
-                return status;
-        }
+        return (statusMap as Record<string, any>)[status]?.label || status;
     };
 
     // 计算剩余有效期
@@ -230,13 +198,13 @@ export const CertList = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || "吊销失败");
+                throw new Error(errorData.error || t('acmeCertPage.revokeFailed'));
             }
 
-            message.success("证书吊销成功");
+            message.success(t('acmeCertPage.revokeSuccess'));
             tableQueryResult.refetch();
         } catch (error) {
-            message.error("证书吊销失败: " + (error as any).message);
+            message.error(t('acmeCertPage.revokeFailed') + ": " + (error as any).message);
         }
     };
 
@@ -269,12 +237,12 @@ export const CertList = () => {
                 >
                     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                         <Form.Item
-                            label={<span style={{ fontWeight: 500, color: '#595959' }}>域名搜索</span>}
+                            label={<span style={{ fontWeight: 500, color: '#595959' }}>{t('acmeCertPage.domainSearch')}</span>}
                             style={{ marginBottom: 0 }}
                         >
                             <Input.Search
                                 style={{ width: 220 }}
-                                placeholder="输入域名关键词进行搜索"
+                                placeholder={t('acmeCertPage.enterDomainKeyword')}
                                 value={getCurrentDomainFilter()}
                                 onChange={(e) => handleDomainSearch(e.target.value)}
                                 onSearch={handleDomainSearch}
@@ -283,11 +251,11 @@ export const CertList = () => {
                         </Form.Item>
                         
                         <Form.Item
-                            label={<span style={{ fontWeight: 500, color: '#595959' }}>证书类型</span>}
+                            label={<span style={{ fontWeight: 500, color: '#595959' }}>{t('acmeCertPage.certificateType')}</span>}
                             style={{ marginBottom: 0 }}
                         >
                             <Select
-                                placeholder="选择证书类型"
+                                placeholder={t('acmeCertPage.selectCertType')}
                                 options={certTypeOptions}
                                 allowClear
                                 style={{
@@ -303,11 +271,11 @@ export const CertList = () => {
                         </Form.Item>
                         
                         <Form.Item
-                            label={<span style={{ fontWeight: 500, color: '#595959' }}>状态筛选</span>}
+                            label={<span style={{ fontWeight: 500, color: '#595959' }}>{t('acmeCertPage.statusFilter')}</span>}
                             style={{ marginBottom: 0 }}
                         >
                             <Select
-                                placeholder="选择状态"
+                                placeholder={t('acmeCertPage.selectStatus')}
                                 options={statusOptions}
                                 allowClear
                                 style={{
@@ -326,7 +294,7 @@ export const CertList = () => {
                         <CertApply 
                             key="cert-apply" 
                             onSuccess={() => {
-                                // 证书申请成功后刷新列表
+                                // Refresh the list after certificate application success
                                 tableQueryResult.refetch();
                             }} 
                         />
@@ -378,7 +346,7 @@ export const CertList = () => {
                 `}</style>
                 <Table.Column 
                     dataIndex="id" 
-                    title="ID" 
+                    title={t('acmeCertPage.id')}
                     width="200px"
                     ellipsis={{
                         showTitle: false,
@@ -411,7 +379,7 @@ export const CertList = () => {
                 
                 <Table.Column
                     dataIndex="domains"
-                    title="域名"
+                    title={t('acmeCertPage.domains')}
                     width="30%"
                     ellipsis={{
                         showTitle: false,
@@ -433,7 +401,7 @@ export const CertList = () => {
                 
                 <Table.Column 
                     dataIndex="cert_type" 
-                    title="证书类型" 
+                    title={t('acmeCertPage.certificateType')}
                     width="150px"
                     render={(value: string) => (
                         <Tag color={value === 'DV' ? 'blue' : 'purple'}>
@@ -443,7 +411,7 @@ export const CertList = () => {
                 />
                 
                 <Table.Column 
-                    title="剩余有效期(天)" 
+                    title={t('acmeCertPage.remainingDays')}
                     width="150px"
                     render={(_, record: any) => {
                         const remainingDays = calculateRemainingDays(record.issued_at, record.validity_days);
@@ -461,7 +429,7 @@ export const CertList = () => {
                         
                         return (
                             <Tag color={color}>
-                                {days <= 0 ? '已过期' : `${days}天`}
+                                {days <= 0 ? t('acmeCertPage.expired') : `${days}${t('acmeCertPage.days')}`}
                             </Tag>
                         );
                     }}
@@ -469,7 +437,7 @@ export const CertList = () => {
                 
                 <Table.Column 
                     dataIndex="cert_status" 
-                    title="状态" 
+                    title={t('acmeCertPage.status')}
                     width="150px"
                     render={(value: string) => (
                         <Tag color={getStatusColor(value)}>
@@ -479,7 +447,7 @@ export const CertList = () => {
                 />
                 
                 <Table.Column
-                    title="操作"
+                    title={t('acmeCertPage.actions')}
                     dataIndex="actions"
                     width="280px"
                     render={(_, record: BaseRecord) => {
@@ -497,7 +465,7 @@ export const CertList = () => {
                                         fontSize: '12px',
                                     }}
                                 >
-                                    下载证书链
+                                    {t('acmeCertPage.downloadCertChain')}
                                 </Button>
                                 {canAccessPrivateKey?.can && (
                                 <Button
@@ -510,16 +478,16 @@ export const CertList = () => {
                                         fontSize: '12px',
                                     }}
                                 >
-                                    下载私钥
+                                    {t('acmeCertPage.downloadPrivateKey')}
                                 </Button>
                                 )}
                                 {record.id && (
                                     <Popconfirm
-                                        title="吊销证书"
-                                        description={canRevoke ? "确定要吊销此证书吗？此操作不可恢复。" : "只有已签发的证书才能吊销"}
+                                        title={t('acmeCertPage.revokeCert')}
+                                        description={canRevoke ? t('acmeCertPage.revokeConfirmation') : t('acmeCertPage.onlyIssuedCanBeRevoked')}
                                         onConfirm={() => canRevoke && handleRevokeCert(record.id as string)}
-                                        okText="确定"
-                                        cancelText="取消"
+                                        okText={t('acmeCertPage.confirm')}
+                                        cancelText={t('acmeCertPage.cancel')}
                                         disabled={!canRevoke}
                                     >
                                         <Button 
@@ -559,7 +527,7 @@ export const CertList = () => {
                                                 }
                                             }}
                                         >
-                                            {'吊销证书'}
+                                            {t('acmeCertPage.revokeCert')}
                                         </Button>
                                     </Popconfirm>
                                 )}
@@ -596,7 +564,7 @@ export const CertList = () => {
                                         e.currentTarget.style.borderColor = '#ffccc7';
                                     }}
                                 >
-                                    删除
+                                    {t('acmeCertPage.delete')}
                                 </Button>
                                 {/* 隐藏原始的 DeleteButton 但保留其功能 */}
                                 <div style={{ display: 'none' }}>

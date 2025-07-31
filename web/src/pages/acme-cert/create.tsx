@@ -3,6 +3,7 @@ import { Modal, Steps, Form, Input, Button, message, Select, Table, Radio, Card,
 import dayjs from "dayjs";
 import { useList, useCreate, useCustomMutation } from "@refinedev/core";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from 'react-i18next';
 
 const { Step } = Steps;
 const { Text, Paragraph } = Typography;
@@ -27,6 +28,7 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
     const [verifyMode, setVerifyMode] = useState<'manual' | 'auto'>('manual');
     const [authData, setAuthData] = useState<any>(null);
     const [dnsProviderSelected, setDnsProviderSelected] = useState<string>('');
+    const { t } = useTranslation();
 
     // 获取 ACME 账户列表
     const { data: acmeAccounts } = useList({
@@ -112,17 +114,17 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
             });
 
             if (response.ok) {
-                message.success("证书申请成功！");
+                message.success(t('acmeCertPage.applySuccess'));
                 setLoading(false);
                 onSuccess && onSuccess();
                 onClose();
             } else {
                 const errorData = await response.json();
-                message.error("申请失败: " + (errorData.error || '未知错误'));
+                message.error(t('acmeCertPage.applyFailed') + ": " + (errorData.error || t('acmeCertPage.unknownError')));
                 setLoading(false);
             }
         } catch (error: any) {
-            message.error("申请失败: " + error.message);
+            message.error(t('acmeCertPage.applyFailed') + ": " + error.message);
             setLoading(false);
         }
     };
@@ -130,7 +132,7 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
     // DNS记录表格列定义
     const dnsRecordColumns = [
         {
-            title: '主机记录',
+            title: t('acmeCertPage.hostRecord'),
             dataIndex: 'host',
             key: 'host',
             render: (_: any, record: any, index: number) => {
@@ -139,7 +141,7 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
             }
         },
         {
-            title: '记录值',
+            title: t('acmeCertPage.recordValue'),
             dataIndex: 'value',
             key: 'value',
             render: (_: any, record: any, index: number) => {
@@ -164,7 +166,7 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
     // 步骤内容
     const steps = [
         {
-            title: "基本信息",
+            title: t('acmeCertPage.basicInfo'),
             content: (
                 <Form
                     form={form1}
@@ -173,12 +175,12 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
                     onFinish={handleCreateAuth}
                 >
                     <Form.Item 
-                        label="ACME 账户" 
+                        label={t('acmeCertPage.acmeAccount')}
                         name="acme_account_id" 
-                        rules={[{ required: true, message: "请选择 ACME 账户" }]}
+                        rules={[{ required: true, message: t('acmeCertPage.pleaseSelectAcmeAccount') }]}
                     >
                         <Select
-                            placeholder="请选择 ACME 账户"
+                            placeholder={t('acmeCertPage.pleaseSelectAcmeAccount')}
                             options={acmeAccounts?.data?.map((account: any) => ({
                                 label: account.name,
                                 value: account.id,
@@ -187,21 +189,21 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
                     </Form.Item>
 
                     <Form.Item 
-                        label="证书私钥类型"
+                        label={t('acmeCertPage.certKeyType')}
                         name="key_type" 
-                        rules={[{ required: true, message: "请选择密钥类型" }]}
+                        rules={[{ required: true, message: t('acmeCertPage.pleaseSelectKeyType') }]}
                     >
                         <Select
-                            placeholder="请选择密钥类型"
+                            placeholder={t('acmeCertPage.pleaseSelectKeyType')}
                             options={keyTypeOptions}
                         />
                     </Form.Item>
 
                     <Form.Item 
-                        label="域名列表" 
+                        label={t('acmeCertPage.domainList')}
                         name="domains" 
-                        rules={[{ required: true, message: "请输入域名列表" }]}
-                        extra="每行输入一个域名"
+                        rules={[{ required: true, message: t('acmeCertPage.pleaseEnterDomainList') }]}
+                        extra={t('acmeCertPage.oneLinePerDomain')}
                     >
                         <Input.TextArea 
                             rows={4} 
@@ -211,19 +213,19 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
 
                     <Form.Item>
                         <Button type="primary" htmlType="submit" loading={loading}>
-                            下一步
+                            {t('acmeCertPage.nextStep')}
                         </Button>
                     </Form.Item>
                 </Form>
             ),
         },
         {
-            title: "域名验证",
+            title: t('acmeCertPage.domainVerification'),
             content: (
                 <div>
                     {/* 验证模式选择 */}
                     <Card style={{ marginBottom: 16 }}>
-                        <Form.Item label="验证模式">
+                        <Form.Item label={t('acmeCertPage.verificationMode')}>
                             <Radio.Group 
                                 value={verifyMode} 
                                 onChange={(e) => {
@@ -235,17 +237,17 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
                                     }
                                 }}
                             >
-                                <Radio value="manual">手动验证</Radio>
-                                <Radio value="auto">自动验证</Radio>
+                                <Radio value="manual">{t('acmeCertPage.manualVerification')}</Radio>
+                                <Radio value="auto">{t('acmeCertPage.automaticVerification')}</Radio>
                             </Radio.Group>
                         </Form.Item>
                     </Card>
 
                     {/* 手动验证模式 */}
                     {verifyMode === 'manual' && (
-                        <Card title="DNS 记录配置" style={{ marginBottom: 16 }}>
+                        <Card title={t('acmeCertPage.dnsRecordConfig')} style={{ marginBottom: 16 }}>
                             <Paragraph type="secondary" style={{ marginBottom: 16 }}>
-                                请在您的DNS服务商处添加以下TXT记录，然后点击"验证"按钮：
+                                {t('acmeCertPage.addDnsTxtRecords')}
                             </Paragraph>
                             <Table
                                 columns={dnsRecordColumns}
@@ -258,15 +260,15 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
 
                     {/* 自动验证模式 */}
                     {verifyMode === 'auto' && (
-                        <Card title="DNS 自动验证" style={{ marginBottom: 16 }}>
+                        <Card title={t('acmeCertPage.dnsAutoVerification')} style={{ marginBottom: 16 }}>
                             <Form form={form2} layout="vertical">
                                 <Form.Item 
-                                    label="选择DNS提供商" 
+                                    label={t('acmeCertPage.selectDnsProvider')}
                                     name="dns_provider_id"
-                                    rules={[{ required: true, message: "请选择DNS提供商" }]}
+                                    rules={[{ required: true, message: t('acmeCertPage.pleaseSelectDnsProvider') }]}
                                 >
                                     <Select
-                                        placeholder="请选择DNS提供商"
+                                        placeholder={t('acmeCertPage.pleaseSelectDnsProvider')}
                                         value={dnsProviderSelected}
                                         onChange={(value) => {
                                             setDnsProviderSelected(value);
@@ -279,7 +281,7 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
                                     />
                                 </Form.Item>
                                 <Paragraph>
-                                    系统将自动在您的DNS提供商处添加验证记录，验证完成后会自动删除。
+                                    {t('acmeCertPage.autoVerificationDescription')}
                                 </Paragraph>
                             </Form>
                         </Card>
@@ -288,7 +290,7 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
                     {/* 操作按钮 */}
                     <div style={{ textAlign: 'center' }}>
                         <Button onClick={() => setCurrent(0)} style={{ marginRight: 8 }}>
-                            上一步
+                            {t('acmeCertPage.prevStep')}
                         </Button>
                         <Button 
                             type="primary" 
@@ -296,7 +298,7 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
                             loading={loading}
                             disabled={isButtonDisabled()}
                         >
-                            {verifyMode === 'manual' ? '验证并申请证书' : '自动申请证书'}
+                            {verifyMode === 'manual' ? t('acmeCertPage.verifyAndApply') : t('acmeCertPage.autoApply')}
                         </Button>
                     </div>
                 </div>
@@ -321,7 +323,7 @@ export const CertApplyModal: React.FC<CertApplyModalProps> = ({ visible, onClose
             open={visible}
             onCancel={handleModalClose}
             footer={null}
-            title="申请证书"
+            title={t('acmeCertPage.applyCertificate')}
             width={800}
             destroyOnClose
             maskClosable={false}
@@ -340,11 +342,12 @@ interface CertApplyProps {
 
 export const CertApply: React.FC<CertApplyProps> = ({ onSuccess }) => {
     const [visible, setVisible] = useState(false);
+    const { t } = useTranslation();
 
     return (
         <>
             <Button type="primary" onClick={() => setVisible(true)}>
-                申请证书
+                {t('acmeCertPage.applyCertificate')}
             </Button>
             <CertApplyModal
                 visible={visible}
