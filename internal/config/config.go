@@ -16,6 +16,7 @@ type AppConfig struct {
 	Env           string `mapstructure:"env"`
 	Port          int    `mapstructure:"port"`
 	SessionSecret string `mapstructure:"session_secret"`
+	Language      string `mapstructure:"language"`
 }
 
 type DatabaseConfig struct {
@@ -40,6 +41,7 @@ func (c *Config) GetDBPort() int           { return c.Database.Port }
 func (c *Config) GetDBUser() string        { return c.Database.User }
 func (c *Config) GetDBPassword() string    { return c.Database.Password }
 func (c *Config) GetDBName() string        { return c.Database.Name }
+func (c *Config) GetLanguage() string      { return c.App.Language }
 
 func NewConfig() *Config {
 	// 设置配置文件名称和路径

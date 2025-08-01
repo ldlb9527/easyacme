@@ -2,6 +2,7 @@ package controller
 
 import (
 	"easyacme/internal/common"
+	"easyacme/internal/config"
 	"easyacme/internal/model"
 	"easyacme/internal/service"
 	"github.com/gin-contrib/sessions"
@@ -19,15 +20,17 @@ type AccountController struct {
 	db             *gorm.DB
 	logger         *zap.Logger
 	accountService service.AccountService
+	conf           *config.Config
 	initUserMutex  sync.Mutex // 初始化用户的互斥锁
 }
 
 // NewAccountController 创建用户控制器
-func NewAccountController(db *gorm.DB, logger *zap.Logger, accountService service.AccountService) *AccountController {
+func NewAccountController(db *gorm.DB, logger *zap.Logger, accountService service.AccountService, conf *config.Config) *AccountController {
 	return &AccountController{
 		db:             db,
 		logger:         logger,
 		accountService: accountService,
+		conf:           conf,
 	}
 }
 
@@ -383,7 +386,10 @@ func (s *AccountController) InitUser(ctx *gin.Context) {
 	s.initUserMutex.Lock()
 	defer s.initUserMutex.Unlock()
 
-	var req service.InitUserReq
+	language := s.conf.GetLanguage()
+	req := service.InitUserReq{
+		Language: language,
+	}
 
 	resp, err := s.accountService.InitUser(ctx.Request.Context(), &req)
 	if err != nil {

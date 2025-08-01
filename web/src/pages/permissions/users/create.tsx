@@ -1,20 +1,22 @@
 import React from "react";
 import { useForm, useSelect } from "@refinedev/antd";
 import { Form, Input, Select, Button, Space, message } from "antd";
+import { useTranslation } from 'react-i18next';
 
 interface UserCreateProps {
     onSuccess?: () => void;
 }
 
 export const UserCreate: React.FC<UserCreateProps> = ({ onSuccess }) => {
+    const { t } = useTranslation();
     const { formProps, saveButtonProps, form } = useForm({
         onMutationSuccess: () => {
-            message.success("用户创建成功");
+            message.success(t('userPage.createSuccess'));
             form.resetFields();
             onSuccess?.();
         },
         onMutationError: (error) => {
-            message.error("用户创建失败");
+            message.error(t('userPage.createFailed'));
         },
     });
 
@@ -37,48 +39,22 @@ export const UserCreate: React.FC<UserCreateProps> = ({ onSuccess }) => {
                 requiredMark={false}
             >
                 <Form.Item
-                    label={<span style={{ fontWeight: 500 }}>用户名</span>}
+                    label={<span style={{ fontWeight: 500 }}>{t('userPage.username')}</span>}
                     name="username"
                     rules={[
                         {
                             required: true,
-                            message: "请输入用户名",
+                            message: t('userPage.usernameRequired'),
                         },
                         {
                             min: 3,
-                            message: "用户名至少3个字符",
+                            message: t('userPage.usernameMinLength'),
                         },
                     ]}
                     style={{ marginBottom: '20px' }}
                 >
                     <Input 
-                        placeholder="请输入用户名" 
-                        style={{
-                            borderRadius: '6px',
-                            border: '1px solid #e8e8e8',
-                            padding: '8px 12px',
-                            fontSize: '14px',
-                        }}
-                    />
-                </Form.Item>
-                
-                <Form.Item
-                    label={<span style={{ fontWeight: 500 }}>密码</span>}
-                    name="password"
-                    rules={[
-                        {
-                            required: true,
-                            message: "请输入密码",
-                        },
-                        {
-                            min: 6,
-                            message: "密码至少6个字符",
-                        },
-                    ]}
-                    style={{ marginBottom: '20px' }}
-                >
-                    <Input.Password 
-                        placeholder="请输入密码" 
+                        placeholder={t('userPage.enterUsername')} 
                         style={{
                             borderRadius: '6px',
                             border: '1px solid #e8e8e8',
@@ -89,14 +65,40 @@ export const UserCreate: React.FC<UserCreateProps> = ({ onSuccess }) => {
                 </Form.Item>
 
                 <Form.Item
-                    label={<span style={{ fontWeight: 500 }}>角色</span>}
+                    label={<span style={{ fontWeight: 500 }}>{t('userPage.password')}</span>}
+                    name="password"
+                    rules={[
+                        {
+                            required: true,
+                            message: t('userPage.passwordRequired'),
+                        },
+                        {
+                            min: 6,
+                            message: t('userPage.passwordMinLength'),
+                        },
+                    ]}
+                    style={{ marginBottom: '20px' }}
+                >
+                    <Input.Password 
+                        placeholder={t('userPage.enterPassword')} 
+                        style={{
+                            borderRadius: '6px',
+                            border: '1px solid #e8e8e8',
+                            padding: '8px 12px',
+                            fontSize: '14px',
+                        }}
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    label={<span style={{ fontWeight: 500 }}>{t('userPage.role')}</span>}
                     name="role_ids"
                     style={{ marginBottom: '32px' }}
                 >
                     <Select
                         {...roleSelectProps}
                         mode="multiple"
-                        placeholder="请选择角色"
+                        placeholder={t('userPage.selectRoles')}
                         allowClear
                         showSearch
                         style={{
@@ -118,7 +120,7 @@ export const UserCreate: React.FC<UserCreateProps> = ({ onSuccess }) => {
                                 color: '#666',
                             }}
                         >
-                            取消
+                            {t('userPage.cancel')}
                         </Button>
                         <Button 
                             {...saveButtonProps}
@@ -128,7 +130,7 @@ export const UserCreate: React.FC<UserCreateProps> = ({ onSuccess }) => {
                                 fontWeight: 500,
                             }}
                         >
-                            创建用户
+                            {t('userPage.createUser')}
                         </Button>
                     </Space>
                 </Form.Item>

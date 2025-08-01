@@ -8,9 +8,11 @@ import {
     DeleteButton,
     CreateButton,
 } from "@refinedev/antd";
-import { Table, Space, Button, Popconfirm, message, Card, Typography, Switch, Drawer } from "antd";
+import { Table, Space, Button, Popconfirm, message, Card, Typography, Switch, Drawer, ConfigProvider } from "antd";
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { UserCreate } from "./create";
+import { useTranslation } from 'react-i18next';
+import zhCN from 'antd/locale/zh_CN';
 
 const { Text } = Typography;
 import dayjs from "dayjs";
@@ -20,6 +22,7 @@ export const UserList = () => {
         syncWithLocation: true,
     });
     const go = useGo();
+    const { t } = useTranslation();
 
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [selectedRows, setSelectedRows] = useState<BaseRecord[]>([]);
@@ -81,6 +84,7 @@ export const UserList = () => {
 
     return (
         <>
+            <ConfigProvider locale={zhCN}>
             <List
                 headerButtons={({ defaultButtons }) => (
                     <>
@@ -93,7 +97,7 @@ export const UserList = () => {
                                 fontWeight: 500,
                             }}
                         >
-                            新建用户
+                            {t('userPage.createUser')}
                         </Button>
                     </>
                 )}
@@ -112,15 +116,15 @@ export const UserList = () => {
                     >
                         <Space>
                             <Text style={{ color: '#666', fontSize: '14px' }}>
-                                已选择 <Text strong>{selectedRowKeys.length}</Text> 项
+                                {t('userPage.selected')} <Text strong>{selectedRowKeys.length}</Text> {t('userPage.items')}
                             </Text>
 
                             <Popconfirm
-                                title="批量删除"
-                                description={`确定要删除选中的 ${selectedRowKeys.length} 个用户吗？此操作不可恢复。`}
+                                title={t('userPage.batchDelete')}
+                                description={t('userPage.confirmBatchDelete', { count: selectedRowKeys.length })}
                                 onConfirm={handleBatchDelete}
-                                okText="确定"
-                                cancelText="取消"
+                                okText={t('userPage.confirm')}
+                                cancelText={t('userPage.cancel')}
                             >
                                 <Button 
                                     size="small" 
@@ -128,7 +132,7 @@ export const UserList = () => {
                                     icon={<DeleteOutlined />}
                                     style={{ borderRadius: '4px' }}
                                 >
-                                    批量删除
+                                    {t('userPage.batchDelete')}
                                 </Button>
                             </Popconfirm>
                             <Button 
@@ -139,7 +143,7 @@ export const UserList = () => {
                                 }}
                                 style={{ borderRadius: '4px' }}
                             >
-                                取消选择
+                                {t('userPage.cancelSelection')}
                             </Button>
                         </Space>
                     </Card>
@@ -166,7 +170,7 @@ export const UserList = () => {
                 >
                     <Table.Column
                         dataIndex={["username"]}
-                        title="用户名"
+                        title={t('userPage.username')}
                         render={(_, record: BaseRecord) => (
                             <a
                                 style={{ 
@@ -191,7 +195,7 @@ export const UserList = () => {
                     />
                     <Table.Column
                         dataIndex={["enabled"]}
-                        title="启用"
+                        title={t('userPage.enabled')}
                         width={80}
                         render={(value: boolean, record: BaseRecord) => (
                             <Switch
@@ -203,7 +207,7 @@ export const UserList = () => {
                     />
                     <Table.Column
                         dataIndex={["roles"]}
-                        title="角色列表"
+                        title={t('userPage.roles')}
                         render={(roles: any[]) => (
                             <Space size={[4, 4]} wrap>
                                 {roles && roles.length > 0 ? (
@@ -230,7 +234,7 @@ export const UserList = () => {
                     />
                     <Table.Column
                         dataIndex={["last_login_at"]}
-                        title="上次登录时间"
+                        title={t('userPage.lastLoginTime')}
                         render={(value: any) =>
                             value ? (
                                 <Text style={{ fontSize: '13px', color: '#666' }}>
@@ -243,7 +247,7 @@ export const UserList = () => {
                     />
                     <Table.Column
                         dataIndex={["created_at"]}
-                        title="创建时间"
+                        title={t('userPage.createdAt')}
                         render={(value: any) =>
                             value ? (
                                 <Text style={{ fontSize: '13px', color: '#666' }}>
@@ -253,7 +257,7 @@ export const UserList = () => {
                         }
                     />
                     <Table.Column
-                        title="操作"
+                        title={t('userPage.actions')}
                         dataIndex="actions"
                         width={120}
                         render={(_, record: BaseRecord) => (
@@ -290,10 +294,11 @@ export const UserList = () => {
                     />
                 </Table>
             </List>
+            </ConfigProvider>
 
             {/* 创建用户抽屉 */}
             <Drawer
-                title="新建用户"
+                title={t('userPage.createUser')}
                 placement="right"
                 width={480}
                 onClose={() => setDrawerVisible(false)}

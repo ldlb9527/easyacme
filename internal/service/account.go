@@ -107,6 +107,7 @@ type ListRoleResp struct {
 }
 
 type InitUserReq struct {
+	Language string `json:"language"`
 }
 
 type InitUserResp struct {
@@ -649,7 +650,7 @@ func (s *AccountServiceImpl) InitUser(ctx context.Context, req *InitUserReq) (*I
 			Username: username,
 			Password: string(hashedPassword),
 			Enabled:  true,
-			Language: "zh-CN",
+			Language: req.Language,
 		}
 		if err := tx.Create(&user).Error; err != nil {
 			return errors.Wrap(err, "创建初始用户失败")

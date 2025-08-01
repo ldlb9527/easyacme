@@ -7,8 +7,10 @@ import {
     ShowButton,
     DeleteButton,
 } from "@refinedev/antd";
-import { Table, Space, Button, Popconfirm, message, Card, Typography } from "antd";
+import { Table, Space, Button, Popconfirm, message, Card, Typography, ConfigProvider } from "antd";
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
+import zhCN from 'antd/locale/zh_CN';
 
 const { Text } = Typography;
 import dayjs from "dayjs";
@@ -18,6 +20,7 @@ export const RoleList = () => {
         syncWithLocation: true,
     });
     const go = useGo();
+    const { t } = useTranslation();
 
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [selectedRows, setSelectedRows] = useState<BaseRecord[]>([]);
@@ -52,30 +55,31 @@ export const RoleList = () => {
     };
 
     return (
-        <List
-            headerButtons={({ defaultButtons }) => (
-                <>
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => {
-                            go({
-                                to: {
-                                    resource: "account/roles",
-                                    action: "create",
-                                },
-                            });
-                        }}
-                        style={{
-                            borderRadius: '6px',
-                            fontWeight: 500,
-                        }}
-                    >
-                        新建角色
-                    </Button>
-                </>
-            )}
-        >
+        <ConfigProvider locale={zhCN}>
+            <List
+                headerButtons={({ defaultButtons }) => (
+                    <>
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => {
+                                go({
+                                    to: {
+                                        resource: "account/roles",
+                                        action: "create",
+                                    },
+                                });
+                            }}
+                            style={{
+                                borderRadius: '6px',
+                                fontWeight: 500,
+                            }}
+                        >
+                            {t('rolePage.createRole')}
+                        </Button>
+                    </>
+                )}
+            >
             {/* 批量操作栏 */}
             {selectedRowKeys.length > 0 && (
                 <Card 
@@ -90,14 +94,14 @@ export const RoleList = () => {
                 >
                     <Space>
                         <Text style={{ color: '#666', fontSize: '14px' }}>
-                            已选择 <Text strong>{selectedRowKeys.length}</Text> 项
+                            {t('rolePage.selected')} <Text strong>{selectedRowKeys.length}</Text> {t('rolePage.items')}
                         </Text>
                         <Popconfirm
-                            title="批量删除"
-                            description={`确定要删除选中的 ${selectedRowKeys.length} 个角色吗？此操作不可恢复。`}
+                            title={t('rolePage.batchDelete')}
+                            description={t('rolePage.confirmBatchDelete', { count: selectedRowKeys.length })}
                             onConfirm={handleBatchDelete}
-                            okText="确定"
-                            cancelText="取消"
+                            okText={t('rolePage.confirm')}
+                            cancelText={t('rolePage.cancel')}
                         >
                             <Button 
                                 size="small" 
@@ -105,7 +109,7 @@ export const RoleList = () => {
                                 icon={<DeleteOutlined />}
                                 style={{ borderRadius: '4px' }}
                             >
-                                批量删除
+                                {t('rolePage.batchDelete')}
                             </Button>
                         </Popconfirm>
                         <Button 
@@ -116,7 +120,7 @@ export const RoleList = () => {
                             }}
                             style={{ borderRadius: '4px' }}
                         >
-                            取消选择
+                            {t('rolePage.cancelSelection')}
                         </Button>
                     </Space>
                 </Card>
@@ -143,7 +147,7 @@ export const RoleList = () => {
             >
                 <Table.Column
                     dataIndex="name"
-                    title="名称"
+                    title={t('rolePage.name')}
                     render={(_, record: BaseRecord) => (
                         <a
                             style={{ 
@@ -168,7 +172,7 @@ export const RoleList = () => {
                 />
                 <Table.Column 
                     dataIndex="description" 
-                    title="描述" 
+                    title={t('rolePage.description')} 
                     render={(value: string) => (
                         <Text style={{ fontSize: '13px', color: '#666' }}>
                             {value || '-'}
@@ -177,7 +181,7 @@ export const RoleList = () => {
                 />
                 <Table.Column
                     dataIndex={["created_at"]}
-                    title="创建时间"
+                    title={t('rolePage.createdAt')}
                     render={(value: any) =>
                         value ? (
                             <Text style={{ fontSize: '13px', color: '#666' }}>
@@ -187,7 +191,7 @@ export const RoleList = () => {
                     }
                 />
                 <Table.Column
-                    title="操作"
+                    title={t('rolePage.actions')}
                     dataIndex="actions"
                     width={120}
                     render={(_, record: BaseRecord) => (
@@ -224,5 +228,6 @@ export const RoleList = () => {
                 />
             </Table>
         </List>
-    );
+    </ConfigProvider>
+        );
 };
