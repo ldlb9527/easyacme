@@ -5,7 +5,7 @@ set -e
 REGISTRY="registry.cn-hangzhou.aliyuncs.com"
 NAMESPACE="ldlb"
 IMAGE_NAME="easyacme"
-VERSION="0.0.2"
+VERSION="0.0.3"
 
 # 完整镜像名称
 FULL_IMAGE_NAME="${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${VERSION}"

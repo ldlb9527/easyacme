@@ -14,6 +14,7 @@ import {
 } from "antd";
 import React, { useContext } from "react";
 import { LogoutOutlined, UserOutlined, SettingOutlined, GlobalOutlined } from "@ant-design/icons";
+import { changeLanguage } from "../../utils/language";
 import { ColorModeContext } from "../../contexts/color-mode";
 import { useTranslation } from "react-i18next";
 
@@ -53,10 +54,9 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   }
 
   // 切换语言
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "zh" ? "en" : "zh";
-    i18n.changeLanguage(newLang);
-    localStorage.setItem("language", newLang);
+  const toggleLanguage = async () => {
+    const newLang = i18n.language === "zh-CN" ? "en-US" : "zh-CN";
+    await changeLanguage(newLang);
   };
 
   return (
@@ -96,7 +96,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             alignItems: 'center',
           }}
         >
-          {i18n.language === "zh" ? "EN" : "中"}
+          {i18n.language === "zh-CN" ? "EN" : "中"}
         </Button>
 
         {/* 主题切换按钮 */}

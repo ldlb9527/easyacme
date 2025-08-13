@@ -14,11 +14,12 @@ type authMiddleware struct {
 }
 
 var notNeedAuthPath = map[string]struct{}{
-	"/api/auth/login":  {},
-	"/api/auth/logout": {},
-	"/api/auth/info":   {},
-	"/api/ping":        {},
-	"/api/init/user":   {},
+	"/api/auth/login":    {},
+	"/api/auth/logout":   {},
+	"/api/auth/info":     {},
+	"/api/ping":          {},
+	"/api/init/user":     {},
+	"/api/auth/language": {},
 }
 
 // isPublicPath 检查路径是否为公开路径

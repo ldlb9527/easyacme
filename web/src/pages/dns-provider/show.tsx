@@ -102,6 +102,7 @@ export const DNSShow = () => {
             'baiducloud': { name: t('dnsProviderPage.baiducloud'), color: 'purple' },
             'cloudflare': { name: 'Cloudflare', color: 'geekblue' },
             'godaddy': { name: 'GoDaddy', color: 'green' },
+            'route53': { name: 'AWS Route53', color: 'cyan' },
         };
         return typeMap[type] || { name: type || t('dnsProviderPage.unknown'), color: 'default' };
     };
@@ -115,6 +116,7 @@ export const DNSShow = () => {
             'baiducloud': { idKey: 'BAIDUCLOUD_ACCESS_KEY_ID', keyKey: 'BAIDUCLOUD_SECRET_ACCESS_KEY' },
             'cloudflare': { idKey: 'CLOUDFLARE_API_TOKEN', keyKey: 'CLOUDFLARE_ZONE_ID' },
             'godaddy': { idKey: 'GODADDY_API_KEY', keyKey: 'GODADDY_API_SECRET' },
+            'route53': { idKey: 'AWS_ACCESS_KEY_ID', keyKey: 'AWS_SECRET_ACCESS_KEY' },
         };
         return keyMap[type] || { idKey: 'SECRET_ID', keyKey: 'SECRET_KEY' };
     };

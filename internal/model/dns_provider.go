@@ -11,12 +11,13 @@ const (
 	DNSTypeBaiduCloud   DNSType = "baiducloud"
 	DNSTypeCloudflare   DNSType = "cloudflare"
 	DNSTypeGoDaddy      DNSType = "godaddy"
+	DNSTypeRoute53      DNSType = "route53"
 )
 
 // IsValid 验证DNS类型是否有效
 func (d DNSType) IsValid() bool {
 	switch d {
-	case DNSTypeTencentCloud, DNSTypeAliyun, DNSTypeHuaweiCloud, DNSTypeBaiduCloud, DNSTypeCloudflare, DNSTypeGoDaddy:
+	case DNSTypeTencentCloud, DNSTypeAliyun, DNSTypeHuaweiCloud, DNSTypeBaiduCloud, DNSTypeCloudflare, DNSTypeGoDaddy, DNSTypeRoute53:
 		return true
 	default:
 		return false
@@ -43,6 +44,8 @@ func (d DNSType) GetDisplayName() string {
 		return "Cloudflare"
 	case DNSTypeGoDaddy:
 		return "GoDaddy"
+	case DNSTypeRoute53:
+		return "AWS Route53"
 	default:
 		return "未知"
 	}

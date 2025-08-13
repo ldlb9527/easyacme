@@ -8,6 +8,7 @@ import "@refinedev/antd/dist/reset.css";
 
 import { useList } from "@refinedev/core";
 import { useEffect } from "react";
+import { initializeLanguage } from "./utils/language";
 import { useTranslation } from "react-i18next";
 
 // 导入i18n配置
@@ -207,6 +208,8 @@ const myDataProvider = {
 function App() {
     useEffect(() => {
         document.title = "Easy ACME";
+        // 初始化应用语言设置
+        initializeLanguage();
     }, []);
 
     const { t } = useTranslation();

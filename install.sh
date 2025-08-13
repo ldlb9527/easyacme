@@ -5,7 +5,7 @@ set -e
 REGISTRY="registry.cn-hangzhou.aliyuncs.com"
 NAMESPACE="ldlb"
 IMAGE_NAME="easyacme"
-VERSION="0.0.2"
+VERSION="0.0.3"
 
 # 默认安装目录和端口
 DEFAULT_INSTALL_DIR="./easyacme"

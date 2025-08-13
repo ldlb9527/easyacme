@@ -3,6 +3,7 @@ app:
   env: "dev"  # 环境: dev, prod, test
   port: 8080
   session_secret: "your-session-secret-key-change-in-production"
+  language: zh-CN
 
 # 数据库配置
 database:

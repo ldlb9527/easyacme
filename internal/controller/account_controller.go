@@ -379,6 +379,99 @@ func (s *AccountController) DeleteRole(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "角色删除成功"})
 }
 
+// ===== 语言接口 =====
+
+// GetLanguage 获取当前语言
+func (s *AccountController) GetLanguage(ctx *gin.Context) {
+	// 尝试从会话中获取用户语言
+	var language string
+	session := sessions.Default(ctx)
+	userJson := session.Get(common.SessionUser)
+	if userJson != nil {
+		userBytes, ok := userJson.([]byte)
+		if ok {
+			var user *model.User
+			err := json.Unmarshal(userBytes, &user)
+			if err == nil && user != nil && user.Language != "" {
+				language = user.Language
+			}
+		}
+	}
+
+	// 如果未获取到用户语言，使用配置中的默认语言
+	if language == "" {
+		language = s.conf.GetLanguage()
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"language": language,
+	})
+}
+
+// UpdateLanguageReq 更新语言请求
+type UpdateLanguageReq struct {
+	Language string `json:"language" binding:"required"`
+}
+
+// UpdateLanguage 更新当前用户的语言设置
+func (s *AccountController) UpdateLanguage(ctx *gin.Context) {
+	// 从 context 中获取当前用户
+	currentUserObj, exists := ctx.Get(common.CurrentUSer)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未登录"})
+		return
+	}
+
+	user, ok := currentUserObj.(*model.User)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "用户数据类型错误"})
+		return
+	}
+
+	// 解析请求
+	var req UpdateLanguageReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 更新用户语言
+	err := s.accountService.UpdateUser(ctx.Request.Context(), &service.UpdateUserReq{
+		ID:       user.ID,
+		Language: req.Language,
+	})
+
+	if err != nil {
+		s.logger.Error("UpdateLanguage err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 更新会话中的用户数据
+	user.Language = req.Language
+
+	// 更新session中的用户数据
+	session := sessions.Default(ctx)
+	updatedUserJson, err := json.Marshal(user)
+	if err != nil {
+		s.logger.Error("Marshal updated user err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "序列化用户数据失败"})
+		return
+	}
+
+	session.Set(common.SessionUser, updatedUserJson)
+	if err := session.Save(); err != nil {
+		s.logger.Error("Save session err: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "保存会话失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":  "语言更新成功",
+		"language": req.Language,
+	})
+}
+
 // ===== 初始化用户接口 =====
 
 // InitUser 初始化用户（只能执行一次）

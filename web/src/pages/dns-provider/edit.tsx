@@ -18,6 +18,7 @@ export const DNSEdit = () => {
         { label: t('dnsProviderPage.baiducloud'), value: 'baiducloud' },
         { label: 'Cloudflare', value: 'cloudflare' },
         { label: 'GoDaddy', value: 'godaddy' },
+        { label: 'AWS Route53', value: 'route53' },
     ];
 
     // 获取授权字段的键名
@@ -58,6 +59,12 @@ export const DNSEdit = () => {
                 keyKey: 'GODADDY_API_SECRET',
                 idPlaceholder: '请输入GoDaddy API Key',
                 keyPlaceholder: '请输入GoDaddy API Secret'
+            },
+            'route53': { 
+                idKey: 'AWS_ACCESS_KEY_ID', 
+                keyKey: 'AWS_SECRET_ACCESS_KEY',
+                idPlaceholder: '请输入AWS Access Key ID',
+                keyPlaceholder: '请输入AWS Secret Access Key'
             },
         };
         return keyMap[type] || { 

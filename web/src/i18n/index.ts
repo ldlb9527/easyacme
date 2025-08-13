@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 
 // 内联翻译资源
 const resources = {
-  en: {
+  "en-US": {
     translation: {
       "common": {
         "language": "Language",
@@ -32,6 +32,15 @@ const resources = {
       "theme": {
         "light": "Light",
         "dark": "Dark"
+      },
+      "login": {
+        "title": "Easy ACME",
+        "username": "Username",
+        "password": "Password",
+        "rememberMe": "Remember me",
+        "loginButton": "Login",
+        "failed": "Login Failed",
+        "invalidCredentials": "Invalid username or password, please try again"
       },
       "dashboard": {
         "loading": "Loading data...",
@@ -302,7 +311,7 @@ const resources = {
       }
     }
   },
-  zh: {
+  "zh-CN": {
     translation: {
       "common": {
         "language": "语言",
@@ -331,6 +340,15 @@ const resources = {
       "theme": {
         "light": "亮色",
         "dark": "暗色"
+      },
+      "login": {
+        "title": "Easy ACME",
+        "username": "账号",
+        "password": "密码",
+        "rememberMe": "记住密码",
+        "loginButton": "登录",
+        "failed": "登录失败",
+        "invalidCredentials": "用户名或密码错误，请重试"
       },
       "dashboard": {
         "loading": "数据加载中...",
@@ -608,8 +626,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem('language') || 'zh', // 默认语言为中文
-    fallbackLng: 'zh',
+    lng: localStorage.getItem('language') || 'zh-CN', // 默认语言为中文
+    fallbackLng: 'zh-CN',
     interpolation: {
       escapeValue: false // 不转义HTML
     }

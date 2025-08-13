@@ -75,6 +75,8 @@ func NewGinEngine(cfg *config.Config, logger *zap.Logger, middlewareManager *mid
 	api.POST("/auth/login", d.Login)
 	api.POST("/auth/logout", d.Logout)
 	api.GET("/auth/info", d.GetMe)
+	api.GET("/auth/language", d.GetLanguage)
+	api.POST("/language", d.UpdateLanguage)
 
 	// 初始化用户接口（不需要权限，只能执行一次）
 	api.POST("/init/user", d.InitUser)

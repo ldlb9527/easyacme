@@ -1,3 +1,7 @@
+# EasyACME
+
+[English](README_EN.md) | 中文
+
 ## 介绍
 可视化的ACME客户端
 
@@ -28,4 +32,4 @@ cd easyacme
 ```
 * 如果仅构建当前主机架构,修改为`build.sh`的构建命令为为`docker build -t "${FULL_IMAGE_NAME}" .`
 
-## 欢迎反馈和贡献
+## 欢迎反馈

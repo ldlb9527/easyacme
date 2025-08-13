@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLogin } from "@refinedev/core";
 import { Form, Input, Button, Typography, notification, Checkbox, theme } from "antd";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { 
   UserOutlined, 
@@ -21,6 +22,7 @@ export const Login = () => {
   const [loading, setLoading] = useState(false);
   const { mutate: login } = useLogin();
   const { token } = theme.useToken();
+  const { t } = useTranslation();
 
   const handleLogin = async (values: any) => {
     setLoading(true);
@@ -32,8 +34,8 @@ export const Login = () => {
     } catch (error: any) {
       console.error('Login error:', error);
       notification.error({
-        message: '登录失败',
-        description: error?.message || '用户名或密码错误，请重试',
+        message: t('login.failed'),
+        description: error?.message || t('login.invalidCredentials'),
         placement: 'topRight',
       });
     } finally {
@@ -100,7 +102,7 @@ export const Login = () => {
             fontWeight: 700,
             letterSpacing: '1.5px'
           }}>
-            Easy ACME
+            {t('login.title')}
           </Title>
         </div>
 
@@ -127,12 +129,12 @@ export const Login = () => {
         >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: '请输入账号' }]}
+            rules={[{ required: true, message: t('common.pleaseEnter', { field: t('login.username') }) }]}
             style={{ marginBottom: '20px' }}
           >
             <Input
               prefix={<UserOutlined style={{ color: '#bfbfbf' }} />}
-              placeholder="账号"
+              placeholder={t('login.username')}
               style={{
                 height: '48px',
                 borderRadius: '8px',
@@ -144,12 +146,12 @@ export const Login = () => {
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: '请输入密码' }]}
+            rules={[{ required: true, message: t('common.pleaseEnter', { field: t('login.password') }) }]}
             style={{ marginBottom: '20px' }}
           >
             <Input.Password
               prefix={<LockOutlined style={{ color: '#bfbfbf' }} />}
-              placeholder="密码"
+              placeholder={t('login.password')}
               style={{
                 height: '48px',
                 borderRadius: '8px',
@@ -161,7 +163,7 @@ export const Login = () => {
 
           <Form.Item name="remember" valuePropName="checked" style={{ marginBottom: '20px' }}>
             <Checkbox style={{ fontSize: '14px', color: '#8c8c8c' }}>
-              记住密码
+              {t('login.rememberMe')}
             </Checkbox>
           </Form.Item>
 
@@ -179,7 +181,7 @@ export const Login = () => {
                 boxShadow: 'none'
               }}
             >
-              登录
+              {t('login.loginButton')}
             </Button>
           </Form.Item>
 
